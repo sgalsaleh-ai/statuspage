@@ -92,7 +92,7 @@ jobs:
             oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/unstable/statuspage \
             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
             --set image.tag=${GITHUB_SHA} \
-            --wait --timeout 120s
+            --wait --timeout 180s
 
       - name: Verify deployment
         run: |
@@ -101,9 +101,9 @@ jobs:
           kubectl rollout status deployment/statuspage
           kubectl get pods
 
-      - name: Remove cluster
-        if: always()
-        run: |
-          if [ -n "${{ steps.cluster.outputs.cluster-id }}" ]; then
-            replicated cluster rm "${{ steps.cluster.outputs.cluster-id }}"
-          fi
+      # - name: Remove cluster
+      #   if: always()
+      #   run: |
+      #     if [ -n "${{ steps.cluster.outputs.cluster-id }}" ]; then
+      #       replicated cluster rm "${{ steps.cluster.outputs.cluster-id }}"
+      #     fi

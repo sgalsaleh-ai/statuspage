@@ -87,7 +87,7 @@ jobs:
             oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/pr-${{ github.event.pull_request.number }}/statuspage \
             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
             --set image.tag=pr${{ github.event.pull_request.number }} \
-            --wait --timeout 120s
+            --wait --timeout 180s
 
       - name: Verify deployment
         run: |
@@ -96,14 +96,14 @@ jobs:
           kubectl rollout status deployment/statuspage
           kubectl get pods
 
-      - name: Remove cluster
-        if: always()
-        run: |
-          if [ -n "${{ steps.cluster.outputs.cluster-id }}" ]; then
-            replicated cluster rm "${{ steps.cluster.outputs.cluster-id }}"
-          fi
+      # - name: Remove cluster
+      #   if: always()
+      #   run: |
+      #     if [ -n "${{ steps.cluster.outputs.cluster-id }}" ]; then
+      #       replicated cluster rm "${{ steps.cluster.outputs.cluster-id }}"
+      #     fi
 
-      - name: Archive channel
-        if: always()
-        run: |
-          replicated channel delete "pr-${{ github.event.pull_request.number }}" || true
+      # - name: Archive channel
+      #   if: always()
+      #   run: |
+      #     replicated channel delete "pr-${{ github.event.pull_request.number }}" || true
