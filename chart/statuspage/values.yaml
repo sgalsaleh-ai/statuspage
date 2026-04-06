@@ -74,17 +74,14 @@ externalPostgresql:
   database: ""
   sslmode: "disable"
 
-# Embedded Centrifugo (subchart)
+# Embedded Centrifugo v5 (subchart)
 centrifugo:
   enabled: true
   config:
-    client:
-      allowed_origins: ["*"]
-    channel:
-      namespaces: []
-  env:
-    CENTRIFUGO_HTTP_API_KEY: "statuspage-api-key"
-    CENTRIFUGO_ALLOW_SUBSCRIBE_FOR_CLIENT: "true"
+    api_key: "statuspage-api-key"
+    allowed_origins: "*"
+    allow_subscribe_for_client: true
+    namespaces: []
   resources:
     requests:
       cpu: 50m

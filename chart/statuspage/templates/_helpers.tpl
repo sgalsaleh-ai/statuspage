@@ -86,7 +86,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 
 {{- define "statuspage.centrifugoAPIKey" -}}
 {{- if .Values.centrifugo.enabled }}
-{{- index .Values.centrifugo.env "CENTRIFUGO_HTTP_API_KEY" | default "statuspage-api-key" }}
+{{- .Values.centrifugo.config.api_key | default "statuspage-api-key" }}
 {{- else }}
 {{- .Values.externalCentrifugo.apiKey }}
 {{- end }}

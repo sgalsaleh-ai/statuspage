@@ -11,6 +11,6 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
   - name: centrifugo
-    version: "13.0.1"
+    version: "11.8.10"
     repository: https://centrifugal.github.io/helm-charts
     condition: centrifugo.enabled
