@@ -83,7 +83,7 @@ jobs:
       matrix:
         cluster:
           - distribution: kind
-            version: v1.29.0
+            version: 1.32.11
     steps:
       - uses: actions/checkout@v4
 
