@@ -69,29 +69,19 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "statuspage.centrifugoURL" -}}
-{{- if .Values.centrifugo.enabled }}
 {{- printf "http://%s-centrifugo:%s" .Release.Name "9000" }}
-{{- else }}
-{{- .Values.externalCentrifugo.url }}
-{{- end }}
 {{- end }}
 
 {{- define "statuspage.centrifugoPublicURL" -}}
 {{- if .Values.app.centrifugoPublicURL }}
 {{- .Values.app.centrifugoPublicURL }}
-{{- else if .Values.centrifugo.enabled }}
-{{- printf "http://%s-centrifugo:%s" .Release.Name "8000" }}
 {{- else }}
-{{- .Values.externalCentrifugo.url }}
+{{- printf "http://%s-centrifugo:%s" .Release.Name "8000" }}
 {{- end }}
 {{- end }}
 
 {{- define "statuspage.centrifugoAPIKey" -}}
-{{- if .Values.centrifugo.enabled }}
 {{- .Values.centrifugo.config.api_key | default "statuspage-api-key" }}
-{{- else }}
-{{- .Values.externalCentrifugo.apiKey }}
-{{- end }}
 {{- end }}
 
 {{- define "statuspage.tlsSecretName" -}}

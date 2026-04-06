@@ -77,7 +77,7 @@ externalPostgresql:
   database: ""
   sslmode: "disable"
 
-# Embedded Centrifugo v5 (subchart)
+# Centrifugo v5 (subchart) — always embedded, handles real-time WebSocket updates
 centrifugo:
   enabled: true
   config:
@@ -93,8 +93,3 @@ centrifugo:
     limits:
       cpu: 200m
       memory: 128Mi
-
-# External Centrifugo (when centrifugo.enabled=false)
-externalCentrifugo:
-  url: ""
-  apiKey: ""

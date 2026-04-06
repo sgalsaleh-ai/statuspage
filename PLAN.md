@@ -52,7 +52,7 @@ Browser (public, unauthenticated) ──► React App ──► Go API (read-onl
 | Subchart | Purpose | Embedded by default | BYO opt-in |
 |----------|---------|-------------------|------------|
 | Bitnami PostgreSQL | Primary data store | Yes (StatefulSet) | Yes — provide external host/port/user/password/dbname |
-| Centrifugo | Real-time WebSocket relay | Yes (Deployment) | Yes — provide external Centrifugo URL + API key |
+| Centrifugo | Real-time WebSocket relay | Yes (Deployment) | N/A — always embedded |
 
 Both subcharts are conditional via Helm values. When BYO is selected, the subchart pods are not deployed and the app connects to the external instance.
 
@@ -101,7 +101,7 @@ Init container in the app pod checks PostgreSQL is reachable before the main con
 
 These Helm values map to config screen items:
 - **Embedded vs external PostgreSQL** — toggle + connection fields (host/port/user/password/dbname)
-- **Embedded vs external Centrifugo** — toggle + connection fields (URL/API key)
+- **Centrifugo** — always embedded, handles real-time updates
 - **Subscriber notifications** — enable/disable (gated by license entitlement in Tier 2)
 - **Resend settings** — API key, from address (only relevant when notifications enabled)
 
