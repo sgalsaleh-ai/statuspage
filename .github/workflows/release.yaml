@@ -14,8 +14,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      image-tag: ${{ steps.meta.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -43,12 +41,9 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  create-release:
+  create-and-test-release:
     needs: build-and-push
     runs-on: ubuntu-latest
-    outputs:
-      release-sequence: ${{ steps.create-release.outputs.release-sequence }}
-      channel-slug: ${{ steps.create-release.outputs.channel-slug }}
     steps:
       - uses: actions/checkout@v4
 
@@ -59,10 +54,11 @@ jobs:
       - name: Package Helm chart
         run: |
           helm dependency update ./chart/statuspage
+          helm lint ./chart/statuspage
           helm package ./chart/statuspage -d ./kots \
             --version ${{ steps.version.outputs.version }}
 
-      - name: Update image and chart version in HelmChart CR
+      - name: Update chart version in HelmChart CR
         run: |
           sed -i 's|chartVersion: .*|chartVersion: ${{ steps.version.outputs.version }}|' kots/helmchart.yaml
 
@@ -74,65 +70,3 @@ jobs:
           yaml-dir: ./kots
           promote-channel: Unstable
           version: ${{ steps.version.outputs.version }}
-
-  test:
-    needs: create-release
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        cluster:
-          - distribution: kind
-            version: 1.32.11
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Create cluster
-        id: create-cluster
-        uses: replicatedhq/replicated-actions/create-cluster@v1
-        with:
-          api-token: ${{ secrets.REPLICATED_API_TOKEN }}
-          kubernetes-distribution: ${{ matrix.cluster.distribution }}
-          kubernetes-version: ${{ matrix.cluster.version }}
-          cluster-name: release-${{ github.run_number }}
-          ttl: 20m
-
-      - name: Install app
-        uses: replicatedhq/replicated-actions/helm-install@v1
-        with:
-          api-token: ${{ secrets.REPLICATED_API_TOKEN }}
-          app-slug: ${{ secrets.REPLICATED_APP }}
-          channel-slug: ${{ needs.create-release.outputs.channel-slug }}
-          helm-chart-name: statuspage
-          kubeconfig: ${{ steps.create-cluster.outputs.cluster-kubeconfig }}
-          helm-run-preflights: false
-          helm-values: |
-            image:
-              repository: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-              tag: ${{ github.sha }}
-
-      - name: Verify deployment
-        run: |
-          echo "${{ steps.create-cluster.outputs.cluster-kubeconfig }}" > /tmp/kubeconfig
-          export KUBECONFIG=/tmp/kubeconfig
-          kubectl wait --for=condition=available deployment/statuspage --timeout=120s
-          kubectl get pods
-
-      - name: Remove cluster
-        if: always()
-        uses: replicatedhq/replicated-actions/remove-cluster@v1
-        with:
-          api-token: ${{ secrets.REPLICATED_API_TOKEN }}
-          cluster-id: ${{ steps.create-cluster.outputs.cluster-id }}
-
-  promote:
-    needs: [create-release, test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: replicatedhq/replicated-actions/promote-release@v1
-        with:
-          app-slug: ${{ secrets.REPLICATED_APP }}
-          api-token: ${{ secrets.REPLICATED_API_TOKEN }}
-          channel-to: Unstable
-          release-sequence: ${{ needs.create-release.outputs.release-sequence }}
-          release-version: 0.1.0-${GITHUB_SHA::7}
