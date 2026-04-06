@@ -14,8 +14,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    outputs:
-      image-tag: ${{ steps.meta.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -43,14 +41,21 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  create-release:
+  release-and-test:
     needs: build-and-push
     runs-on: ubuntu-latest
-    outputs:
-      release-sequence: ${{ steps.create-release.outputs.release-sequence }}
-      channel-slug: ${{ steps.create-release.outputs.channel-slug }}
+    env:
+      REPLICATED_API_TOKEN: ${{ secrets.REPLICATED_API_TOKEN }}
+      REPLICATED_APP: ${{ secrets.REPLICATED_APP }}
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Replicated CLI
+        run: |
+          curl -s https://api.github.com/repos/replicatedhq/replicated/releases/latest \
+            | grep "browser_download_url.*linux_amd64.tar.gz" \
+            | cut -d '"' -f 4 \
+            | xargs curl -sL | tar xz -C /usr/local/bin replicated
 
       - name: Set version
         id: version
@@ -62,77 +67,54 @@ jobs:
           helm package ./chart/statuspage -d ./kots \
             --version ${{ steps.version.outputs.version }}
 
-      - name: Update image and chart version in HelmChart CR
+      - name: Update chart version in HelmChart CR
         run: |
           sed -i 's|chartVersion: .*|chartVersion: ${{ steps.version.outputs.version }}|' kots/helmchart.yaml
 
-      - uses: replicatedhq/replicated-actions/create-release@v1
-        id: create-release
-        with:
-          app-slug: ${{ secrets.REPLICATED_APP }}
-          api-token: ${{ secrets.REPLICATED_API_TOKEN }}
-          yaml-dir: ./kots
-          promote-channel: Unstable
-          version: ${{ steps.version.outputs.version }}
+      - name: Create release and promote to Unstable
+        id: release
+        run: |
+          SEQUENCE=$(replicated release create \
+            --yaml-dir ./kots \
+            --promote Unstable \
+            --version "${{ steps.version.outputs.version }}" \
+            --auto -o json | jq -r '.sequence')
+          echo "sequence=$SEQUENCE" >> "$GITHUB_OUTPUT"
 
-  test:
-    needs: create-release
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        cluster:
-          - distribution: kind
-            version: 1.32.11
-    steps:
-      - uses: actions/checkout@v4
+      - name: Create CMX cluster
+        id: cluster
+        run: |
+          CLUSTER_ID=$(replicated cluster create \
+            --distribution kind \
+            --version 1.32.11 \
+            --name "release-${{ github.run_number }}" \
+            --ttl 20m \
+            --wait 5m \
+            -o json | jq -r '.id')
+          echo "cluster-id=$CLUSTER_ID" >> "$GITHUB_OUTPUT"
+          replicated cluster kubeconfig --id "$CLUSTER_ID" > /tmp/kubeconfig
 
-      - name: Create cluster
-        id: create-cluster
-        uses: replicatedhq/replicated-actions/create-cluster@v1
-        with:
-          api-token: ${{ secrets.REPLICATED_API_TOKEN }}
-          kubernetes-distribution: ${{ matrix.cluster.distribution }}
-          kubernetes-version: ${{ matrix.cluster.version }}
-          cluster-name: release-${{ github.run_number }}
-          ttl: 20m
-
-      - name: Install app
-        uses: replicatedhq/replicated-actions/helm-install@v1
-        with:
-          api-token: ${{ secrets.REPLICATED_API_TOKEN }}
-          app-slug: ${{ secrets.REPLICATED_APP }}
-          channel-slug: ${{ needs.create-release.outputs.channel-slug }}
-          helm-chart-name: statuspage
-          kubeconfig: ${{ steps.create-cluster.outputs.cluster-kubeconfig }}
-          helm-run-preflights: false
-          helm-values: |
-            image:
-              repository: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-              tag: ${{ github.sha }}
+      - name: Install app via Helm
+        run: |
+          export KUBECONFIG=/tmp/kubeconfig
+          helm registry login registry.replicated.com \
+            --username "${{ secrets.REPLICATED_APP }}" \
+            --password "${{ secrets.REPLICATED_API_TOKEN }}"
+          helm install statuspage \
+            oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/statuspage \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+            --set image.tag=${GITHUB_SHA} \
+            --wait --timeout 120s
 
       - name: Verify deployment
         run: |
-          echo "${{ steps.create-cluster.outputs.cluster-kubeconfig }}" > /tmp/kubeconfig
           export KUBECONFIG=/tmp/kubeconfig
-          kubectl wait --for=condition=available deployment/statuspage --timeout=120s
-          kubectl get pods
+          kubectl get pods -A
+          kubectl wait --for=condition=available deployment/statuspage --timeout=60s
 
       - name: Remove cluster
         if: always()
-        uses: replicatedhq/replicated-actions/remove-cluster@v1
-        with:
-          api-token: ${{ secrets.REPLICATED_API_TOKEN }}
-          cluster-id: ${{ steps.create-cluster.outputs.cluster-id }}
-
-  promote:
-    needs: [create-release, test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: replicatedhq/replicated-actions/promote-release@v1
-        with:
-          app-slug: ${{ secrets.REPLICATED_APP }}
-          api-token: ${{ secrets.REPLICATED_API_TOKEN }}
-          channel-to: Unstable
-          release-sequence: ${{ needs.create-release.outputs.release-sequence }}
-          release-version: 0.1.0-${GITHUB_SHA::7}
+        run: |
+          if [ -n "${{ steps.cluster.outputs.cluster-id }}" ]; then
+            replicated cluster rm --id "${{ steps.cluster.outputs.cluster-id }}"
+          fi
