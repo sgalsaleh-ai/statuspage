@@ -1,3 +1,4 @@
+appSlug: statuspage
 charts:
   - path: ./chart/statuspage
 manifests:

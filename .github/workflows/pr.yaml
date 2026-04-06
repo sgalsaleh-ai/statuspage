@@ -56,23 +56,13 @@ jobs:
             | cut -d '"' -f 4 \
             | xargs curl -sL | tar xz -C /usr/local/bin replicated
 
-      - name: Package Helm chart
-        run: |
-          helm dependency update ./chart/statuspage
-          helm package ./chart/statuspage -d ./kots \
-            --version 0.0.0-pr${{ github.event.pull_request.number }}
-
-      - name: Update chart version in HelmChart CR
-        run: |
-          sed -i 's|chartVersion: .*|chartVersion: 0.0.0-pr${{ github.event.pull_request.number }}|' kots/helmchart.yaml
-
       - name: Create release
         run: |
           replicated release create \
-            --yaml-dir ./kots \
-            --promote pr-${{ github.event.pull_request.number }} \
-            --version "pr-${{ github.event.pull_request.number }}-${{ github.run_number }}" \
-            --auto
+            --promote "pr-${{ github.event.pull_request.number }}" \
+            --version "0.0.0-pr${{ github.event.pull_request.number }}.${{ github.run_number }}" \
+            --ensure-channel \
+            -o json
 
       - name: Create CMX cluster
         id: cluster
@@ -85,7 +75,7 @@ jobs:
             --wait 5m \
             -o json | jq -r '.id')
           echo "cluster-id=$CLUSTER_ID" >> "$GITHUB_OUTPUT"
-          replicated cluster kubeconfig "$CLUSTER_ID" > /tmp/kubeconfig
+          replicated cluster kubeconfig "$CLUSTER_ID" --stdout > /tmp/kubeconfig
 
       - name: Install app via Helm
         run: |
@@ -94,7 +84,7 @@ jobs:
             --username "${{ secrets.REPLICATED_APP }}" \
             --password "${{ secrets.REPLICATED_API_TOKEN }}"
           helm install statuspage \
-            oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/statuspage \
+            oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/pr-${{ github.event.pull_request.number }}/statuspage \
             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
             --set image.tag=pr${{ github.event.pull_request.number }} \
             --wait --timeout 120s
@@ -103,7 +93,6 @@ jobs:
         run: |
           export KUBECONFIG=/tmp/kubeconfig
           kubectl get pods -A
-          kubectl wait --for=condition=available deployment/statuspage --timeout=60s
 
       - name: Remove cluster
         if: always()
@@ -115,4 +104,4 @@ jobs:
       - name: Archive channel
         if: always()
         run: |
-          replicated channel delete pr-${{ github.event.pull_request.number }} || true
+          replicated channel delete "pr-${{ github.event.pull_request.number }}" || true

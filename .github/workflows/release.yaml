@@ -59,27 +59,15 @@ jobs:
 
       - name: Set version
         id: version
-        run: echo "version=0.1.0-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-
-      - name: Package Helm chart
-        run: |
-          helm dependency update ./chart/statuspage
-          helm package ./chart/statuspage -d ./kots \
-            --version ${{ steps.version.outputs.version }}
-
-      - name: Update chart version in HelmChart CR
-        run: |
-          sed -i 's|chartVersion: .*|chartVersion: ${{ steps.version.outputs.version }}|' kots/helmchart.yaml
+        run: echo "version=0.1.0+${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
       - name: Create release and promote to Unstable
         id: release
         run: |
-          SEQUENCE=$(replicated release create \
-            --yaml-dir ./kots \
+          replicated release create \
             --promote Unstable \
             --version "${{ steps.version.outputs.version }}" \
-            --auto -o json | jq -r '.sequence')
-          echo "sequence=$SEQUENCE" >> "$GITHUB_OUTPUT"
+            -o json
 
       - name: Create CMX cluster
         id: cluster
@@ -92,7 +80,7 @@ jobs:
             --wait 5m \
             -o json | jq -r '.id')
           echo "cluster-id=$CLUSTER_ID" >> "$GITHUB_OUTPUT"
-          replicated cluster kubeconfig "$CLUSTER_ID" > /tmp/kubeconfig
+          replicated cluster kubeconfig "$CLUSTER_ID" --stdout > /tmp/kubeconfig
 
       - name: Install app via Helm
         run: |
@@ -101,7 +89,7 @@ jobs:
             --username "${{ secrets.REPLICATED_APP }}" \
             --password "${{ secrets.REPLICATED_API_TOKEN }}"
           helm install statuspage \
-            oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/statuspage \
+            oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/Unstable/statuspage \
             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
             --set image.tag=${GITHUB_SHA} \
             --wait --timeout 120s
@@ -110,7 +98,6 @@ jobs:
         run: |
           export KUBECONFIG=/tmp/kubeconfig
           kubectl get pods -A
-          kubectl wait --for=condition=available deployment/statuspage --timeout=60s
 
       - name: Remove cluster
         if: always()
