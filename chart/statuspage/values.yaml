@@ -4,7 +4,7 @@ replicaCount: 1
 image:
   repository: statuspage
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP
@@ -46,6 +46,9 @@ app:
   jwtSecret: ""
   resendApiKey: ""
   resendFromAddress: "StatusPage <notifications@statuspage.dev>"
+  # URL browsers use to connect to Centrifugo WebSocket (must be reachable from the browser)
+  # Leave empty to use the in-cluster URL (only works with ingress or port-forward)
+  centrifugoPublicURL: ""
 
 # Embedded PostgreSQL (Bitnami subchart)
 postgresql:
@@ -81,6 +84,7 @@ centrifugo:
     api_key: "statuspage-api-key"
     allowed_origins: "*"
     allow_subscribe_for_client: true
+    client_insecure: true
     namespaces: []
   resources:
     requests:

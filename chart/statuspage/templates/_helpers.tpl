@@ -77,7 +77,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "statuspage.centrifugoPublicURL" -}}
-{{- if .Values.centrifugo.enabled }}
+{{- if .Values.app.centrifugoPublicURL }}
+{{- .Values.app.centrifugoPublicURL }}
+{{- else if .Values.centrifugo.enabled }}
 {{- printf "http://%s-centrifugo:%s" .Release.Name "8000" }}
 {{- else }}
 {{- .Values.externalCentrifugo.url }}
