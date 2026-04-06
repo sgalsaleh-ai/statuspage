@@ -1,0 +1,40 @@
+{{- if eq .Values.tls.mode "auto" }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "statuspage.fullname" . }}-tls
+  labels:
+    {{- include "statuspage.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "statuspage.fullname" . }}-tls
+  issuerRef:
+    name: {{ .Values.tls.clusterIssuer }}
+    kind: ClusterIssuer
+  dnsNames:
+    - {{ .Values.tls.host | quote }}
+{{- end }}
+{{- if eq .Values.tls.mode "selfSigned" }}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ include "statuspage.fullname" . }}-selfsigned
+  labels:
+    {{- include "statuspage.labels" . | nindent 4 }}
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "statuspage.fullname" . }}-tls
+  labels:
+    {{- include "statuspage.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "statuspage.fullname" . }}-tls
+  issuerRef:
+    name: {{ include "statuspage.fullname" . }}-selfsigned
+    kind: Issuer
+  dnsNames:
+    - {{ .Values.tls.host | default "statuspage.local" | quote }}
+{{- end }}

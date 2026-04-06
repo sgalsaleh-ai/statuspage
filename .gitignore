@@ -1,0 +1,22 @@
+# Go
+/server
+*.exe
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Helm
+chart/statuspage/charts/
+chart/statuspage/Chart.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# Environment
+.env

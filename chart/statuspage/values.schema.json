@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "replicaCount": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of app replicas"
+    },
+    "image": {
+      "type": "object",
+      "properties": {
+        "repository": { "type": "string", "description": "Container image repository" },
+        "tag": { "type": "string", "description": "Container image tag" },
+        "pullPolicy": { "type": "string", "enum": ["Always", "IfNotPresent", "Never"] }
+      },
+      "required": ["repository", "tag"]
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["ClusterIP", "NodePort", "LoadBalancer"], "description": "Kubernetes service type" },
+        "port": { "type": "integer", "description": "Service port" }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "description": "Enable ingress resource" }
+      }
+    },
+    "tls": {
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string", "enum": ["none", "auto", "manual", "selfSigned"], "description": "TLS certificate mode" },
+        "host": { "type": "string", "description": "Hostname for TLS certificate (auto mode)" },
+        "clusterIssuer": { "type": "string", "description": "cert-manager ClusterIssuer name (auto mode)" },
+        "secretName": { "type": "string", "description": "Existing TLS secret name (manual mode)" }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "description": "CPU/memory resource requests and limits"
+    },
+    "app": {
+      "type": "object",
+      "properties": {
+        "jwtSecret": { "type": "string", "description": "JWT signing secret for admin auth" },
+        "resendApiKey": { "type": "string", "description": "Resend API key for email notifications" },
+        "resendFromAddress": { "type": "string", "description": "From address for notification emails" }
+      }
+    },
+    "postgresql": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "description": "Deploy embedded PostgreSQL" }
+      }
+    },
+    "externalPostgresql": {
+      "type": "object",
+      "properties": {
+        "host": { "type": "string", "description": "External PostgreSQL host" },
+        "port": { "type": "string", "description": "External PostgreSQL port" },
+        "user": { "type": "string", "description": "External PostgreSQL user" },
+        "password": { "type": "string", "description": "External PostgreSQL password" },
+        "database": { "type": "string", "description": "External PostgreSQL database" },
+        "sslmode": { "type": "string", "description": "External PostgreSQL SSL mode" }
+      }
+    },
+    "centrifugo": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "description": "Deploy embedded Centrifugo" }
+      }
+    },
+    "externalCentrifugo": {
+      "type": "object",
+      "properties": {
+        "url": { "type": "string", "description": "External Centrifugo URL" },
+        "apiKey": { "type": "string", "description": "External Centrifugo API key" }
+      }
+    }
+  }
+}

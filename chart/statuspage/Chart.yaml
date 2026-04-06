@@ -1,0 +1,16 @@
+apiVersion: v2
+name: statuspage
+description: A status page application with incident management and real-time updates
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+
+dependencies:
+  - name: postgresql
+    version: "18.5.15"
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+  - name: centrifugo
+    version: "13.0.1"
+    repository: https://centrifugal.github.io/helm-charts
+    condition: centrifugo.enabled
