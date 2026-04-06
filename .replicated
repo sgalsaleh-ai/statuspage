@@ -1,0 +1,4 @@
+charts:
+  - path: ./chart/statuspage
+manifests:
+  - ./kots/**

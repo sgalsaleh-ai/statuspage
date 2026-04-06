@@ -1,0 +1,14 @@
+apiVersion: kots.io/v1beta1
+kind: Application
+metadata:
+  name: statuspage
+spec:
+  title: StatusPage
+  icon: https://raw.githubusercontent.com/sgalsaleh-ai/statuspage/main/frontend/public/favicon.svg
+  statusInformers:
+    - deployment/statuspage
+  ports:
+    - serviceName: statuspage
+      servicePort: 8080
+      localPort: 8080
+      applicationUrl: "http://statuspage"

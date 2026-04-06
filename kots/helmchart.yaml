@@ -1,0 +1,16 @@
+apiVersion: kots.io/v1beta2
+kind: HelmChart
+metadata:
+  name: statuspage
+spec:
+  chart:
+    name: statuspage
+    chartVersion: 0.1.0
+  releaseName: statuspage
+  values: {}
+  optionalValues: []
+  namespace: default
+  weight: 0
+  helmUpgradeFlags:
+    - --wait
+    - --timeout=600s
