@@ -89,7 +89,7 @@ jobs:
             --username "${{ secrets.REPLICATED_APP }}" \
             --password "${{ secrets.REPLICATED_API_TOKEN }}"
           helm install statuspage \
-            oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/Unstable/statuspage \
+            oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/unstable/statuspage \
             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
             --set image.tag=${GITHUB_SHA} \
             --wait --timeout 120s
@@ -97,7 +97,9 @@ jobs:
       - name: Verify deployment
         run: |
           export KUBECONFIG=/tmp/kubeconfig
-          kubectl get pods -A
+          kubectl wait --for=condition=available deployment/statuspage --timeout=120s
+          kubectl rollout status deployment/statuspage
+          kubectl get pods
 
       - name: Remove cluster
         if: always()
