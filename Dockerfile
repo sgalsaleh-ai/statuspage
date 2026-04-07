@@ -18,9 +18,10 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
 
 # Stage 3: Final image
 FROM alpine:3.20
+ARG TARGETARCH
 RUN apk add --no-cache ca-certificates curl
 # Install support-bundle CLI for in-app bundle generation
-RUN curl -sL https://github.com/replicatedhq/troubleshoot/releases/latest/download/support-bundle_linux_amd64.tar.gz \
+RUN curl -sL https://github.com/replicatedhq/troubleshoot/releases/latest/download/support-bundle_linux_${TARGETARCH}.tar.gz \
     | tar xz -C /usr/local/bin support-bundle
 WORKDIR /app
 COPY --from=backend /statuspage ./statuspage
