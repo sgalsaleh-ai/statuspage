@@ -121,3 +121,8 @@ jobs:
       #   if: always()
       #   run: |
       #     replicated channel delete "pr-${{ github.event.pull_request.number }}" || true
+
+      - name: Archive test customer
+        if: always()
+        run: |
+          replicated customer archive "${{ steps.customer.outputs.customer-id }}" || true

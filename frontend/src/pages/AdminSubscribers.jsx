@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react'
+import { useOutletContext } from 'react-router-dom'
 import { api } from '../lib/api'
 
 export default function AdminSubscribers() {
+  const { license } = useOutletContext()
   const [subscribers, setSubscribers] = useState([])
+  const [entitlementEnabled, setEntitlementEnabled] = useState(null)
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+    api.getLicenseField('subscriber_notifications').then(field => {
+      setEntitlementEnabled(field.value === true || field.value === 'true')
+    }).catch(() => setEntitlementEnabled(false))
+  }, [])
 
   async function load() {
     try { setSubscribers(await api.getSubscribers()) } catch (e) { console.error(e) }
@@ -18,6 +26,20 @@ export default function AdminSubscribers() {
     } catch (err) {
       alert(err.message)
     }
+  }
+
+  if (entitlementEnabled === false) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-gray-900">Subscribers</h1>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-center">
+          <p className="text-yellow-800 font-medium">Subscriber Notifications Disabled</p>
+          <p className="text-sm text-yellow-600 mt-2">
+            This feature requires the "Subscriber Notifications" entitlement. Contact your vendor to enable it in your license.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (

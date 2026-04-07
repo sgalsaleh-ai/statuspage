@@ -121,3 +121,8 @@ jobs:
       #     if [ -n "${{ steps.cluster.outputs.cluster-id }}" ]; then
       #       replicated cluster rm "${{ steps.cluster.outputs.cluster-id }}"
       #     fi
+
+      - name: Archive test customer
+        if: always()
+        run: |
+          replicated customer archive "${{ steps.customer.outputs.customer-id }}" || true

@@ -9,6 +9,7 @@ import (
 	"github.com/sgalsaleh-ai/statuspage/internal/db"
 	"github.com/sgalsaleh-ai/statuspage/internal/email"
 	"github.com/sgalsaleh-ai/statuspage/internal/handlers"
+	"github.com/sgalsaleh-ai/statuspage/internal/sdk"
 )
 
 func main() {
@@ -28,8 +29,35 @@ func main() {
 
 	cf := centrifugo.New()
 	em := email.New()
+	sc := sdk.New()
 
-	h := handlers.New(database, cf, em)
+	// Start metrics reporter
+	sc.StartMetricsReporter(func() map[string]any {
+		var componentCount, incidentCount, subscriberCount int
+		database.QueryRow("SELECT COUNT(*) FROM components").Scan(&componentCount)
+		database.QueryRow("SELECT COUNT(*) FROM incidents").Scan(&incidentCount)
+		database.QueryRow("SELECT COUNT(*) FROM subscribers").Scan(&subscriberCount)
+
+		activeIncidents := 0
+		database.QueryRow("SELECT COUNT(*) FROM incidents WHERE status != 'resolved'").Scan(&activeIncidents)
+
+		return map[string]any{
+			"component_count":       componentCount,
+			"incident_count":        incidentCount,
+			"active_incident_count": activeIncidents,
+			"subscriber_count":      subscriberCount,
+		}
+	})
+
+	// Set instance tags
+	go func() {
+		sc.SetInstanceTags(map[string]string{
+			"name": "StatusPage Production",
+			"env":  "production",
+		})
+	}()
+
+	h := handlers.New(database, cf, em, sc)
 
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)

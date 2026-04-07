@@ -100,3 +100,10 @@ centrifugo:
 # Replicated SDK (subchart)
 replicated:
   nameOverride: statuspage-sdk
+  statusInformers:
+    - deployment/statuspage
+    - deployment/statuspage-centrifugo
+    - deployment/statuspage-sdk
+    - statefulset/statuspage-postgresql
+    - service/statuspage
+    - service/statuspage-postgresql

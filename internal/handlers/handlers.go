@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -18,16 +19,18 @@ import (
 	"github.com/sgalsaleh-ai/statuspage/internal/email"
 	"github.com/sgalsaleh-ai/statuspage/internal/middleware"
 	"github.com/sgalsaleh-ai/statuspage/internal/models"
+	"github.com/sgalsaleh-ai/statuspage/internal/sdk"
 )
 
 type Handler struct {
 	db         *sql.DB
 	centrifugo *centrifugo.Client
 	email      *email.Client
+	sdk        *sdk.Client
 }
 
-func New(db *sql.DB, cf *centrifugo.Client, em *email.Client) *Handler {
-	return &Handler{db: db, centrifugo: cf, email: em}
+func New(db *sql.DB, cf *centrifugo.Client, em *email.Client, sc *sdk.Client) *Handler {
+	return &Handler{db: db, centrifugo: cf, email: em, sdk: sc}
 }
 
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
@@ -61,6 +64,11 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 
 	// Centrifugo connection info
 	mux.HandleFunc("GET /api/centrifugo/config", h.CentrifugoConfig)
+
+	// SDK proxy endpoints (frontend queries these)
+	mux.HandleFunc("GET /api/sdk/license", h.GetLicense)
+	mux.HandleFunc("GET /api/sdk/license/field/{name}", h.GetLicenseField)
+	mux.HandleFunc("GET /api/sdk/updates", h.GetUpdates)
 }
 
 // --- Health ---
@@ -590,6 +598,72 @@ func (h *Handler) DeleteSubscriber(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) CentrifugoConfig(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{
 		"url": h.centrifugo.PublicURL(),
+	})
+}
+
+// --- SDK ---
+
+func (h *Handler) GetLicense(w http.ResponseWriter, r *http.Request) {
+	info, err := h.sdk.GetLicenseInfo()
+	if err != nil {
+		log.Printf("sdk license error: %v", err)
+		writeJSON(w, http.StatusOK, map[string]any{
+			"available": false,
+			"error":     err.Error(),
+		})
+		return
+	}
+
+	// Check expiry
+	expiresAt := ""
+	expired := false
+	field, err := h.sdk.GetLicenseField("expires_at")
+	if err == nil && field.Value != nil {
+		if s, ok := field.Value.(string); ok && s != "" {
+			expiresAt = s
+			t, err := time.Parse(time.RFC3339, s)
+			if err == nil && t.Before(time.Now()) {
+				expired = true
+			}
+		}
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"available":    true,
+		"licenseID":    info.LicenseID,
+		"customerName": info.CustomerName,
+		"licenseType":  info.LicenseType,
+		"expiresAt":    expiresAt,
+		"expired":      expired,
+	})
+}
+
+func (h *Handler) GetLicenseField(w http.ResponseWriter, r *http.Request) {
+	name := r.PathValue("name")
+	field, err := h.sdk.GetLicenseField(name)
+	if err != nil {
+		writeJSON(w, http.StatusOK, map[string]any{
+			"name":  name,
+			"value": nil,
+			"error": err.Error(),
+		})
+		return
+	}
+	writeJSON(w, http.StatusOK, field)
+}
+
+func (h *Handler) GetUpdates(w http.ResponseWriter, r *http.Request) {
+	updates, err := h.sdk.GetUpdates()
+	if err != nil {
+		writeJSON(w, http.StatusOK, map[string]any{
+			"updates":   []any{},
+			"available": false,
+		})
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"updates":   updates,
+		"available": len(updates) > 0,
 	})
 }
 
