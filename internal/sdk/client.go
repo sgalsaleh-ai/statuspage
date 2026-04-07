@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"time"
 )
 
@@ -138,6 +139,50 @@ func (c *Client) SetInstanceTags(tags map[string]string) error {
 		return fmt.Errorf("set tags failed: %d", resp.StatusCode)
 	}
 	return nil
+}
+
+// --- Support Bundle ---
+
+func (c *Client) GenerateSupportBundle() (map[string]any, error) {
+	// Step 1: Generate bundle using support-bundle CLI
+	bundlePath := "/tmp/support-bundle-" + fmt.Sprintf("%d", time.Now().Unix()) + ".tar.gz"
+	cmd := exec.Command("support-bundle", "--load-cluster-specs", "-o", bundlePath, "--interactive=false")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("collect support bundle: %s: %w", string(output), err)
+	}
+
+	// Step 2: Upload to SDK
+	f, err := os.Open(bundlePath)
+	if err != nil {
+		return nil, fmt.Errorf("open bundle file: %w", err)
+	}
+	defer f.Close()
+	defer os.Remove(bundlePath)
+
+	stat, _ := f.Stat()
+	req, err := http.NewRequest("POST", c.baseURL+"/api/v1/app/supportbundle", f)
+	if err != nil {
+		return nil, fmt.Errorf("create upload request: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/gzip")
+	req.ContentLength = stat.Size()
+
+	uploadClient := &http.Client{Timeout: 60 * time.Second}
+	resp, err := uploadClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("upload support bundle: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+		return nil, fmt.Errorf("upload failed (%d): %s", resp.StatusCode, string(body))
+	}
+
+	var result map[string]any
+	json.Unmarshal(body, &result)
+	return result, nil
 }
 
 // --- Health ---
