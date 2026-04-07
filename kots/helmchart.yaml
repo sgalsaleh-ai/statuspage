@@ -7,10 +7,35 @@ spec:
     name: statuspage
     chartVersion: 0.1.0
   releaseName: statuspage
-  values: {}
-  optionalValues: []
   namespace: default
   weight: 0
   helmUpgradeFlags:
     - --wait
     - --timeout=600s
+
+  values:
+    postgresql:
+      enabled: repl{{ ConfigOptionEquals `db_type` `embedded` }}
+      auth:
+        password: repl{{ ConfigOption `embedded_db_password` }}
+
+    app:
+      resendApiKey: repl{{ ConfigOption `resend_api_key` }}
+      resendFromAddress: repl{{ ConfigOption `resend_from_address` }}
+      pageTitle: repl{{ ConfigOption `page_title` }}
+      pageHeaderText: repl{{ ConfigOption `page_header_text` }}
+
+  optionalValues:
+    - when: "repl{{ ConfigOptionEquals `db_type` `external` }}"
+      recursiveMerge: true
+      values:
+        externalPostgresql:
+          host: "repl{{ ConfigOption `external_db_host` }}"
+          port: "repl{{ ConfigOption `external_db_port` }}"
+          user: "repl{{ ConfigOption `external_db_user` }}"
+          password: "repl{{ ConfigOption `external_db_password` }}"
+          database: "repl{{ ConfigOption `external_db_name` }}"
+
+  builder:
+    postgresql:
+      enabled: true

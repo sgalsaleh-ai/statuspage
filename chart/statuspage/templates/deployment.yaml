@@ -83,6 +83,10 @@ spec:
             - name: RESEND_FROM_ADDRESS
               value: {{ .Values.app.resendFromAddress | quote }}
             {{- end }}
+            - name: PAGE_TITLE
+              value: {{ .Values.app.pageTitle | quote }}
+            - name: PAGE_HEADER_TEXT
+              value: {{ .Values.app.pageHeaderText | quote }}
           livenessProbe:
             httpGet:
               path: /healthz

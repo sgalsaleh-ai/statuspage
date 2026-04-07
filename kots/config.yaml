@@ -1,0 +1,127 @@
+apiVersion: kots.io/v1beta1
+kind: Config
+metadata:
+  name: statuspage
+spec:
+  groups:
+    - name: database
+      title: Database
+      description: Configure the PostgreSQL database for StatusPage.
+      items:
+        - name: db_type
+          title: Database Type
+          type: radio
+          default: embedded
+          help_text: |
+            Choose "Embedded" to deploy PostgreSQL as part of this installation.
+            Choose "External" to connect to an existing PostgreSQL instance you manage.
+          items:
+            - name: embedded
+              title: Embedded (built-in PostgreSQL)
+            - name: external
+              title: External (bring your own)
+
+        - name: embedded_db_password
+          title: Embedded Database Password
+          type: password
+          hidden: true
+          readonly: false
+          value: '{{repl RandomString 24}}'
+          help_text: Auto-generated password for the embedded PostgreSQL database. This value persists across upgrades.
+
+        - name: external_db_host
+          title: Database Host
+          type: text
+          when: 'repl{{ ConfigOptionEquals "db_type" "external" }}'
+          required: true
+          help_text: The hostname or IP address of your external PostgreSQL server (e.g. db.example.com).
+
+        - name: external_db_port
+          title: Database Port
+          type: text
+          default: "5432"
+          when: 'repl{{ ConfigOptionEquals "db_type" "external" }}'
+          required: true
+          help_text: The port your PostgreSQL server listens on. Default is 5432.
+          validation:
+            regex:
+              pattern: '^\d{1,5}$'
+              message: "Port must be a number between 1 and 65535."
+
+        - name: external_db_name
+          title: Database Name
+          type: text
+          default: "statuspage"
+          when: 'repl{{ ConfigOptionEquals "db_type" "external" }}'
+          required: true
+          help_text: The name of the PostgreSQL database to use (e.g. statuspage).
+
+        - name: external_db_user
+          title: Database Username
+          type: text
+          default: "statuspage"
+          when: 'repl{{ ConfigOptionEquals "db_type" "external" }}'
+          required: true
+          help_text: The username to authenticate with your PostgreSQL database.
+
+        - name: external_db_password
+          title: Database Password
+          type: password
+          when: 'repl{{ ConfigOptionEquals "db_type" "external" }}'
+          required: true
+          help_text: The password for the database user specified above.
+
+    - name: notifications
+      title: Email Notifications
+      description: Configure subscriber email notifications powered by Resend.
+      when: 'repl{{ LicenseFieldValue "subscriber_notifications" }}'
+      items:
+        - name: enable_notifications
+          title: Enable Email Notifications
+          type: bool
+          default: "0"
+          help_text: |
+            When enabled, subscribers can sign up for email alerts on the public status page.
+            Requires a valid Resend API key.
+
+        - name: resend_api_key
+          title: Resend API Key
+          type: password
+          when: 'repl{{ ConfigOptionEquals "enable_notifications" "1" }}'
+          required: true
+          help_text: |
+            Your Resend API key for sending notification emails.
+            Get one at https://resend.com/api-keys. Starts with "re_".
+          validation:
+            regex:
+              pattern: '^re_[a-zA-Z0-9_]{10,}$'
+              message: "Resend API key must start with 're_' followed by at least 10 alphanumeric characters."
+
+        - name: resend_from_address
+          title: From Address
+          type: text
+          default: "StatusPage <notifications@statuspage.dev>"
+          when: 'repl{{ ConfigOptionEquals "enable_notifications" "1" }}'
+          help_text: |
+            The email address notifications are sent from (e.g. "StatusPage <alerts@yourdomain.com>").
+            Must be a verified sender domain in your Resend account.
+
+    - name: appearance
+      title: Appearance
+      description: Customize the look of your public status page.
+      items:
+        - name: page_title
+          title: Status Page Title
+          type: text
+          default: "StatusPage"
+          help_text: |
+            The title shown in the header of the public status page and browser tab.
+            For example, "Acme Corp Status" or "Platform Health".
+
+        - name: page_header_text
+          title: Header Description
+          type: text
+          default: ""
+          help_text: |
+            Optional text shown below the title on the public status page.
+            Use this to describe what systems this page covers, e.g. "Real-time status for all Acme services."
