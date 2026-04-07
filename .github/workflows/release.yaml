@@ -90,7 +90,6 @@ jobs:
             --password "${{ secrets.REPLICATED_API_TOKEN }}"
           helm install statuspage \
             oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/unstable/statuspage \
-            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
             --set image.tag=${GITHUB_SHA} \
             --wait --timeout 180s
 

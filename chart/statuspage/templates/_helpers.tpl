@@ -84,6 +84,32 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- .Values.centrifugo.config.api_key | default "statuspage-api-key" }}
 {{- end }}
 
+{{- define "statuspage.image" -}}
+{{- if .Values.image.registry }}
+{{- printf "%s/%s:%s" .Values.image.registry .Values.image.repository .Values.image.tag }}
+{{- else }}
+{{- printf "%s:%s" .Values.image.repository .Values.image.tag }}
+{{- end }}
+{{- end }}
+
+{{- define "statuspage.imagePullSecrets" -}}
+{{- $secrets := list }}
+{{- range .Values.imagePullSecrets }}
+{{- $secrets = append $secrets . }}
+{{- end }}
+{{- if .Values.global }}
+{{- if .Values.global.replicated }}
+{{- if .Values.global.replicated.dockerconfigjson }}
+{{- $secrets = append $secrets (dict "name" (printf "%s-replicated-pull-secret" (include "statuspage.fullname" .))) }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if $secrets }}
+imagePullSecrets:
+{{- toYaml $secrets | nindent 2 }}
+{{- end }}
+{{- end }}
+
 {{- define "statuspage.tlsSecretName" -}}
 {{- if eq .Values.tls.mode "manual" }}
 {{- .Values.tls.secretName }}

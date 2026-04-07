@@ -2,9 +2,12 @@
 replicaCount: 1
 
 image:
-  repository: statuspage
+  registry: proxy.replicated.com
+  repository: proxy/statuspage/ghcr.io/sgalsaleh-ai/statuspage
   tag: latest
   pullPolicy: Always
+
+imagePullSecrets: []
 
 service:
   type: ClusterIP
@@ -93,3 +96,6 @@ centrifugo:
     limits:
       cpu: 200m
       memory: 128Mi
+
+# Replicated SDK (subchart)
+replicated: {}

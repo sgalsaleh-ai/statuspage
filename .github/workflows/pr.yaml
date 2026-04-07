@@ -85,7 +85,6 @@ jobs:
             --password "${{ secrets.REPLICATED_API_TOKEN }}"
           helm install statuspage \
             oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/pr-${{ github.event.pull_request.number }}/statuspage \
-            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
             --set image.tag=pr-${{ github.event.pull_request.number }} \
             --wait --timeout 180s
 
