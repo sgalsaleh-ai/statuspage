@@ -5,7 +5,6 @@ import { api } from '../lib/api'
 export default function AdminDashboard() {
   const [components, setComponents] = useState([])
   const [incidents, setIncidents] = useState([])
-  const [bundleStatus, setBundleStatus] = useState(null)
 
   useEffect(() => {
     api.getComponents().then(setComponents).catch(console.error)
@@ -60,29 +59,6 @@ export default function AdminDashboard() {
         >
           Create Incident
         </Link>
-        <button
-          onClick={async () => {
-            setBundleStatus('generating')
-            try {
-              await api.generateSupportBundle()
-              setBundleStatus('success')
-              setTimeout(() => setBundleStatus(null), 5000)
-            } catch (err) {
-              setBundleStatus('error: ' + err.message)
-              setTimeout(() => setBundleStatus(null), 5000)
-            }
-          }}
-          disabled={bundleStatus === 'generating'}
-          className="px-4 py-2.5 bg-white border border-gray-200 text-sm font-medium text-gray-700 rounded-xl hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50"
-        >
-          {bundleStatus === 'generating' ? 'Generating...' : 'Generate Support Bundle'}
-        </button>
-        {bundleStatus === 'success' && (
-          <span className="text-sm text-emerald-600">Bundle uploaded to Vendor Portal</span>
-        )}
-        {bundleStatus?.startsWith('error') && (
-          <span className="text-sm text-red-600">{bundleStatus}</span>
-        )}
       </div>
 
       {/* Recent Active Incidents */}
