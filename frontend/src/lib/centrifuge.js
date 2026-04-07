@@ -8,7 +8,13 @@ export function connectCentrifugo(url, onEvent) {
     client.disconnect();
   }
 
-  const wsUrl = url.replace(/^http/, 'ws') + '/connection/websocket';
+  let wsUrl;
+  if (!url) {
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    wsUrl = `${proto}//${window.location.host}/connection/websocket`;
+  } else {
+    wsUrl = url.replace(/^http/, 'ws') + '/connection/websocket';
+  }
   client = new Centrifuge(wsUrl);
 
   client.on('connected', (ctx) => {

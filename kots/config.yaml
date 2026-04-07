@@ -71,40 +71,21 @@ spec:
           required: true
           help_text: The password for the database user specified above.
 
-    - name: notifications
-      title: Email Notifications
-      description: Configure subscriber email notifications powered by Resend.
-      when: 'repl{{ LicenseFieldValue "subscriber_notifications" }}'
+    - name: admin
+      title: Application
+      description: Configure the StatusPage application.
       items:
-        - name: enable_notifications
-          title: Enable Email Notifications
-          type: bool
-          default: "0"
-          help_text: |
-            When enabled, subscribers can sign up for email alerts on the public status page.
-            Requires a valid Resend API key.
-
-        - name: resend_api_key
-          title: Resend API Key
+        - name: admin_password
+          title: Admin Password
           type: password
-          when: 'repl{{ ConfigOptionEquals "enable_notifications" "1" }}'
           required: true
           help_text: |
-            Your Resend API key for sending notification emails.
-            Get one at https://resend.com/api-keys. Starts with "re_".
+            The password for the StatusPage admin account.
+            Must be at least 8 characters. Used to log in to the admin dashboard.
           validation:
             regex:
-              pattern: '^re_[a-zA-Z0-9_]{10,}$'
-              message: "Resend API key must start with 're_' followed by at least 10 alphanumeric characters."
-
-        - name: resend_from_address
-          title: From Address
-          type: text
-          default: "StatusPage <notifications@statuspage.dev>"
-          when: 'repl{{ ConfigOptionEquals "enable_notifications" "1" }}'
-          help_text: |
-            The email address notifications are sent from (e.g. "StatusPage <alerts@yourdomain.com>").
-            Must be a verified sender domain in your Resend account.
+              pattern: '^.{8,}$'
+              message: "Password must be at least 8 characters."
 
     - name: appearance
       title: Appearance

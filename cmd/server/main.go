@@ -1,9 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"os"
+	"strings"
 
 	"github.com/sgalsaleh-ai/statuspage/internal/centrifugo"
 	"github.com/sgalsaleh-ai/statuspage/internal/db"
@@ -25,6 +29,13 @@ func main() {
 
 	if err := db.Migrate(database); err != nil {
 		log.Fatalf("failed to run migrations: %v", err)
+	}
+
+	// Set admin password from config screen if provided
+	if adminPass := os.Getenv("ADMIN_PASSWORD"); adminPass != "" {
+		if err := db.SetAdminPassword(database, adminPass); err != nil {
+			log.Printf("failed to set admin password: %v", err)
+		}
 	}
 
 	cf := centrifugo.New()
@@ -68,15 +79,38 @@ func main() {
 		frontendDir = "./frontend/dist"
 	}
 
+	// Reverse proxy to Centrifugo for WebSocket connections
+	centrifugoWSURL := os.Getenv("CENTRIFUGO_PUBLIC_URL")
+	if centrifugoWSURL == "" {
+		centrifugoWSURL = "http://localhost:8000"
+	}
+	cfURL, _ := url.Parse(centrifugoWSURL)
+	centrifugoProxy := httputil.NewSingleHostReverseProxy(cfURL)
+	mux.HandleFunc("GET /connection/websocket", func(w http.ResponseWriter, r *http.Request) {
+		centrifugoProxy.ServeHTTP(w, r)
+	})
+
 	// Serve static assets
 	fs := http.FileServer(http.Dir(frontendDir))
 	mux.Handle("GET /assets/", fs)
 	mux.Handle("GET /favicon.ico", fs)
 
-	// SPA fallback: serve index.html for all non-API, non-asset routes
-	indexPath := frontendDir + "/index.html"
+	// SPA fallback: inject config into index.html and serve
+	indexBytes, err := os.ReadFile(frontendDir + "/index.html")
+	if err != nil {
+		log.Fatalf("failed to read index.html: %v", err)
+	}
+	pageTitle := os.Getenv("PAGE_TITLE")
+	if pageTitle == "" {
+		pageTitle = "StatusPage"
+	}
+	pageHeaderText := os.Getenv("PAGE_HEADER_TEXT")
+	configScript := fmt.Sprintf(`<script>window.__CONFIG__={pageTitle:%q,pageHeaderText:%q}</script>`, pageTitle, pageHeaderText)
+	indexHTML := strings.Replace(string(indexBytes), "</head>", configScript+"</head>", 1)
+
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, indexPath)
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte(indexHTML))
 	})
 
 	port := os.Getenv("PORT")

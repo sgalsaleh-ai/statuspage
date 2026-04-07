@@ -14,14 +14,17 @@ spec:
     - --timeout=600s
 
   values:
+    service:
+      type: NodePort
+      nodePort: 30880
+
     postgresql:
       enabled: repl{{ ConfigOptionEquals `db_type` `embedded` }}
       auth:
         password: repl{{ ConfigOption `embedded_db_password` }}
 
     app:
-      resendApiKey: repl{{ ConfigOption `resend_api_key` }}
-      resendFromAddress: repl{{ ConfigOption `resend_from_address` }}
+      adminPassword: repl{{ ConfigOption `admin_password` }}
       pageTitle: repl{{ ConfigOption `page_title` }}
       pageHeaderText: repl{{ ConfigOption `page_header_text` }}
 

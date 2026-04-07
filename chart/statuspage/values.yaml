@@ -12,6 +12,7 @@ imagePullSecrets: []
 service:
   type: ClusterIP
   port: 8080
+  nodePort: ""
 
 ingress:
   enabled: false
@@ -47,8 +48,8 @@ resources:
 # App configuration
 app:
   jwtSecret: ""
-  resendApiKey: ""
-  resendFromAddress: "StatusPage <notifications@statuspage.dev>"
+  resendFromAddress: "StatusPage <onboarding@resend.dev>"
+  adminPassword: ""
   pageTitle: "StatusPage"
   pageHeaderText: ""
   # URL browsers use to connect to Centrifugo WebSocket (must be reachable from the browser)

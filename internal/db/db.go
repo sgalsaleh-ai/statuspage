@@ -8,6 +8,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func Connect() (*sql.DB, error) {
@@ -54,6 +55,19 @@ func Migrate(db *sql.DB) error {
 		return fmt.Errorf("failed to run migrations: %w", err)
 	}
 	log.Println("database migrations complete")
+	return nil
+}
+
+func SetAdminPassword(database *sql.DB, password string) error {
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("hash password: %w", err)
+	}
+	_, err = database.Exec("UPDATE users SET password_hash = $1 WHERE username = 'admin'", string(hashed))
+	if err != nil {
+		return fmt.Errorf("update admin password: %w", err)
+	}
+	log.Println("admin password set from config")
 	return nil
 }
 
