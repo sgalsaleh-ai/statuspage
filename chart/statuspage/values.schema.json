@@ -70,14 +70,7 @@
     "centrifugo": {
       "type": "object",
       "properties": {
-        "enabled": { "type": "boolean", "description": "Deploy embedded Centrifugo" }
-      }
-    },
-    "externalCentrifugo": {
-      "type": "object",
-      "properties": {
-        "url": { "type": "string", "description": "External Centrifugo URL" },
-        "apiKey": { "type": "string", "description": "External Centrifugo API key" }
+        "enabled": { "type": "boolean", "description": "Deploy Centrifugo for real-time updates" }
       }
     }
   }

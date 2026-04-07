@@ -69,26 +69,44 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{- define "statuspage.centrifugoURL" -}}
-{{- if .Values.centrifugo.enabled }}
 {{- printf "http://%s-centrifugo:%s" .Release.Name "9000" }}
-{{- else }}
-{{- .Values.externalCentrifugo.url }}
-{{- end }}
 {{- end }}
 
 {{- define "statuspage.centrifugoPublicURL" -}}
-{{- if .Values.centrifugo.enabled }}
-{{- printf "http://%s-centrifugo:%s" .Release.Name "8000" }}
+{{- if .Values.app.centrifugoPublicURL }}
+{{- .Values.app.centrifugoPublicURL }}
 {{- else }}
-{{- .Values.externalCentrifugo.url }}
+{{- printf "http://%s-centrifugo:%s" .Release.Name "8000" }}
 {{- end }}
 {{- end }}
 
 {{- define "statuspage.centrifugoAPIKey" -}}
-{{- if .Values.centrifugo.enabled }}
-{{- index .Values.centrifugo.env "CENTRIFUGO_HTTP_API_KEY" | default "statuspage-api-key" }}
+{{- .Values.centrifugo.config.api_key | default "statuspage-api-key" }}
+{{- end }}
+
+{{- define "statuspage.image" -}}
+{{- if .Values.image.registry }}
+{{- printf "%s/%s:%s" .Values.image.registry .Values.image.repository .Values.image.tag }}
 {{- else }}
-{{- .Values.externalCentrifugo.apiKey }}
+{{- printf "%s:%s" .Values.image.repository .Values.image.tag }}
+{{- end }}
+{{- end }}
+
+{{- define "statuspage.imagePullSecrets" -}}
+{{- $secrets := list }}
+{{- range .Values.imagePullSecrets }}
+{{- $secrets = append $secrets . }}
+{{- end }}
+{{- if .Values.global }}
+{{- if .Values.global.replicated }}
+{{- if .Values.global.replicated.dockerconfigjson }}
+{{- $secrets = append $secrets (dict "name" (printf "%s-replicated-pull-secret" (include "statuspage.fullname" .))) }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if $secrets }}
+imagePullSecrets:
+{{- toYaml $secrets | nindent 2 }}
 {{- end }}
 {{- end }}
 

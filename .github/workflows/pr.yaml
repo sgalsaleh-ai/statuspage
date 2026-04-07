@@ -64,6 +64,21 @@ jobs:
             --ensure-channel \
             -o json
 
+      - name: Create test customer
+        id: customer
+        run: |
+          CUSTOMER=$(replicated customer create \
+            --name "ci-pr-${{ github.event.pull_request.number }}-${{ github.run_number }}" \
+            --channel "pr-${{ github.event.pull_request.number }}" \
+            --type dev \
+            --expires-in 1h \
+            --ensure-channel \
+            -o json)
+          echo "customer-id=$(echo $CUSTOMER | jq -r '.id')" >> "$GITHUB_OUTPUT"
+          LICENSE_ID=$(replicated customer download-license \
+            --customer "ci-pr-${{ github.event.pull_request.number }}-${{ github.run_number }}" 2>&1 | grep "licenseID:" | awk '{print $2}')
+          echo "license-id=$LICENSE_ID" >> "$GITHUB_OUTPUT"
+
       - name: Create CMX cluster
         id: cluster
         run: |
@@ -82,26 +97,27 @@ jobs:
           export KUBECONFIG=/tmp/kubeconfig
           helm registry login registry.replicated.com \
             --username "${{ secrets.REPLICATED_APP }}" \
-            --password "${{ secrets.REPLICATED_API_TOKEN }}"
+            --password "${{ steps.customer.outputs.license-id }}"
           helm install statuspage \
             oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/pr-${{ github.event.pull_request.number }}/statuspage \
-            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
-            --set image.tag=pr${{ github.event.pull_request.number }} \
-            --wait --timeout 120s
+            --set image.tag=pr-${{ github.event.pull_request.number }} \
+            --wait --timeout 180s
 
       - name: Verify deployment
         run: |
           export KUBECONFIG=/tmp/kubeconfig
-          kubectl get pods -A
+          kubectl wait --for=condition=available deployment/statuspage --timeout=120s
+          kubectl rollout status deployment/statuspage
+          kubectl get pods
 
-      - name: Remove cluster
-        if: always()
-        run: |
-          if [ -n "${{ steps.cluster.outputs.cluster-id }}" ]; then
-            replicated cluster rm "${{ steps.cluster.outputs.cluster-id }}"
-          fi
+      # - name: Remove cluster
+      #   if: always()
+      #   run: |
+      #     if [ -n "${{ steps.cluster.outputs.cluster-id }}" ]; then
+      #       replicated cluster rm "${{ steps.cluster.outputs.cluster-id }}"
+      #     fi
 
-      - name: Archive channel
-        if: always()
-        run: |
-          replicated channel delete "pr-${{ github.event.pull_request.number }}" || true
+      # - name: Archive channel
+      #   if: always()
+      #   run: |
+      #     replicated channel delete "pr-${{ github.event.pull_request.number }}" || true

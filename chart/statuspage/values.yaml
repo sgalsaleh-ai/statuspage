@@ -2,9 +2,12 @@
 replicaCount: 1
 
 image:
-  repository: statuspage
+  registry: proxy.replicated.com
+  repository: proxy/statuspage/ghcr.io/sgalsaleh-ai/statuspage
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
+
+imagePullSecrets: []
 
 service:
   type: ClusterIP
@@ -46,6 +49,9 @@ app:
   jwtSecret: ""
   resendApiKey: ""
   resendFromAddress: "StatusPage <notifications@statuspage.dev>"
+  # URL browsers use to connect to Centrifugo WebSocket (must be reachable from the browser)
+  # Leave empty to use the in-cluster URL (only works with ingress or port-forward)
+  centrifugoPublicURL: ""
 
 # Embedded PostgreSQL (Bitnami subchart)
 postgresql:
@@ -74,17 +80,15 @@ externalPostgresql:
   database: ""
   sslmode: "disable"
 
-# Embedded Centrifugo (subchart)
+# Centrifugo v5 (subchart) — always embedded, handles real-time WebSocket updates
 centrifugo:
   enabled: true
   config:
-    client:
-      allowed_origins: ["*"]
-    channel:
-      namespaces: []
-  env:
-    CENTRIFUGO_HTTP_API_KEY: "statuspage-api-key"
-    CENTRIFUGO_ALLOW_SUBSCRIBE_FOR_CLIENT: "true"
+    api_key: "statuspage-api-key"
+    allowed_origins: "*"
+    allow_subscribe_for_client: true
+    client_insecure: true
+    namespaces: []
   resources:
     requests:
       cpu: 50m
@@ -93,7 +97,6 @@ centrifugo:
       cpu: 200m
       memory: 128Mi
 
-# External Centrifugo (when centrifugo.enabled=false)
-externalCentrifugo:
-  url: ""
-  apiKey: ""
+# Replicated SDK (subchart)
+replicated:
+  nameOverride: statuspage-sdk

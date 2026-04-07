@@ -20,3 +20,4 @@ chart/statuspage/Chart.lock
 
 # Environment
 .env
+chart/statuspage/statuspage-*.tgz
