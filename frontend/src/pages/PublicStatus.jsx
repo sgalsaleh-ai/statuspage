@@ -16,9 +16,14 @@ export default function PublicStatus() {
   const [loading, setLoading] = useState(true)
   const [email, setEmail] = useState('')
   const [subscribeMsg, setSubscribeMsg] = useState('')
+  const [subscriberEnabled, setSubscriberEnabled] = useState(false)
 
   useEffect(() => {
     loadStatus()
+    // Check if subscriber notifications entitlement is enabled
+    api.getLicenseField('subscriber_notifications').then(field => {
+      setSubscriberEnabled(field.value === true || field.value === 'true')
+    }).catch(() => setSubscriberEnabled(false))
     let disconnect
     api.getCentrifugoConfig().then(config => {
       disconnect = connectCentrifugo(config.url, () => loadStatus())
@@ -133,30 +138,32 @@ export default function PublicStatus() {
           )}
         </div>
 
-        {/* Subscribe */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Subscribe to Updates</h2>
-          <p className="text-sm text-gray-500 mb-4">Get notified when incidents are created or resolved.</p>
-          <form onSubmit={handleSubscribe} className="flex gap-3">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-              className="flex-1 rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-            <button
-              type="submit"
-              className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
-            >
-              Subscribe
-            </button>
-          </form>
-          {subscribeMsg && (
-            <p className="text-sm mt-3 text-gray-600">{subscribeMsg}</p>
-          )}
-        </div>
+        {/* Subscribe — only shown when subscriber_notifications entitlement is enabled */}
+        {subscriberEnabled && (
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Subscribe to Updates</h2>
+            <p className="text-sm text-gray-500 mb-4">Get notified when incidents are created or resolved.</p>
+            <form onSubmit={handleSubscribe} className="flex gap-3">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                className="flex-1 rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+              <button
+                type="submit"
+                className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
+              >
+                Subscribe
+              </button>
+            </form>
+            {subscribeMsg && (
+              <p className="text-sm mt-3 text-gray-600">{subscribeMsg}</p>
+            )}
+          </div>
+        )}
 
         {/* Footer */}
         <p className="text-center text-xs text-gray-400 pt-4">

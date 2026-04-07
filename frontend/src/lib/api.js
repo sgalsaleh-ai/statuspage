@@ -68,4 +68,9 @@ export const api = {
 
   // Centrifugo
   getCentrifugoConfig: () => request('/centrifugo/config'),
+
+  // SDK
+  getLicense: () => request('/sdk/license'),
+  getLicenseField: (name) => request(`/sdk/license/field/${name}`),
+  getUpdates: () => request('/sdk/updates'),
 };
