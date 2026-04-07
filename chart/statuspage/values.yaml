@@ -98,4 +98,5 @@ centrifugo:
       memory: 128Mi
 
 # Replicated SDK (subchart)
-replicated: {}
+replicated:
+  nameOverride: statuspage-sdk

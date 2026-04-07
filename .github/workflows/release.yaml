@@ -69,6 +69,21 @@ jobs:
             --version "${{ steps.version.outputs.version }}" \
             -o json
 
+      - name: Create test customer
+        id: customer
+        run: |
+          CUSTOMER=$(replicated customer create \
+            --name "ci-release-${{ github.run_number }}" \
+            --channel Unstable \
+            --type dev \
+            --expires-in 1h \
+            --ensure-channel \
+            -o json)
+          echo "customer-id=$(echo $CUSTOMER | jq -r '.id')" >> "$GITHUB_OUTPUT"
+          LICENSE_ID=$(replicated customer download-license \
+            --customer "ci-release-${{ github.run_number }}" 2>&1 | grep "licenseID:" | awk '{print $2}')
+          echo "license-id=$LICENSE_ID" >> "$GITHUB_OUTPUT"
+
       - name: Create CMX cluster
         id: cluster
         run: |
@@ -87,7 +102,7 @@ jobs:
           export KUBECONFIG=/tmp/kubeconfig
           helm registry login registry.replicated.com \
             --username "${{ secrets.REPLICATED_APP }}" \
-            --password "${{ secrets.REPLICATED_API_TOKEN }}"
+            --password "${{ steps.customer.outputs.license-id }}"
           helm install statuspage \
             oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/unstable/statuspage \
             --set image.tag=${GITHUB_SHA} \

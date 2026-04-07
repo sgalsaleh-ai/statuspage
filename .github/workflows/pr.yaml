@@ -64,6 +64,21 @@ jobs:
             --ensure-channel \
             -o json
 
+      - name: Create test customer
+        id: customer
+        run: |
+          CUSTOMER=$(replicated customer create \
+            --name "ci-pr-${{ github.event.pull_request.number }}-${{ github.run_number }}" \
+            --channel "pr-${{ github.event.pull_request.number }}" \
+            --type dev \
+            --expires-in 1h \
+            --ensure-channel \
+            -o json)
+          echo "customer-id=$(echo $CUSTOMER | jq -r '.id')" >> "$GITHUB_OUTPUT"
+          LICENSE_ID=$(replicated customer download-license \
+            --customer "ci-pr-${{ github.event.pull_request.number }}-${{ github.run_number }}" 2>&1 | grep "licenseID:" | awk '{print $2}')
+          echo "license-id=$LICENSE_ID" >> "$GITHUB_OUTPUT"
+
       - name: Create CMX cluster
         id: cluster
         run: |
@@ -82,7 +97,7 @@ jobs:
           export KUBECONFIG=/tmp/kubeconfig
           helm registry login registry.replicated.com \
             --username "${{ secrets.REPLICATED_APP }}" \
-            --password "${{ secrets.REPLICATED_API_TOKEN }}"
+            --password "${{ steps.customer.outputs.license-id }}"
           helm install statuspage \
             oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/pr-${{ github.event.pull_request.number }}/statuspage \
             --set image.tag=pr-${{ github.event.pull_request.number }} \
