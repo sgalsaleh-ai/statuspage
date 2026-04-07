@@ -31,11 +31,11 @@ func New() *Client {
 // --- License ---
 
 type LicenseInfo struct {
-	LicenseID    string            `json:"licenseID"`
-	CustomerName string            `json:"customerName"`
-	LicenseType  string            `json:"licenseType"`
-	Entitlements map[string]any    `json:"entitlements"`
-	ExpiresAt    string            `json:"expiresAt,omitempty"`
+	LicenseID    string         `json:"licenseID"`
+	CustomerName string         `json:"customerName"`
+	LicenseType  string         `json:"licenseType"`
+	Entitlements map[string]any `json:"entitlements"`
+	ExpiresAt    string         `json:"expiresAt,omitempty"`
 }
 
 type LicenseField struct {
@@ -161,7 +161,7 @@ func (c *Client) GenerateSupportBundle() (map[string]any, error) {
 	defer os.Remove(bundlePath)
 
 	stat, _ := f.Stat()
-	req, err := http.NewRequest("POST", c.baseURL+"/api/v1/app/supportbundle", f)
+	req, err := http.NewRequest("POST", c.baseURL+"/api/v1/supportbundle", f)
 	if err != nil {
 		return nil, fmt.Errorf("create upload request: %w", err)
 	}

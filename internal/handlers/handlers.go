@@ -72,6 +72,17 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.Handle("POST /api/admin/support-bundle", auth(http.HandlerFunc(h.GenerateSupportBundle)))
 }
 
+// --- Support Bundle ---
+
+func (h *Handler) GenerateSupportBundle(w http.ResponseWriter, r *http.Request) {
+	result, err := h.sdk.GenerateSupportBundle()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
+}
+
 // --- Health ---
 
 func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
@@ -666,17 +677,6 @@ func (h *Handler) GetUpdates(w http.ResponseWriter, r *http.Request) {
 		"updates":   updates,
 		"available": len(updates) > 0,
 	})
-}
-
-// --- Support Bundle ---
-
-func (h *Handler) GenerateSupportBundle(w http.ResponseWriter, r *http.Request) {
-	result, err := h.sdk.GenerateSupportBundle()
-	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
-		return
-	}
-	writeJSON(w, http.StatusOK, result)
 }
 
 // --- Helpers ---
