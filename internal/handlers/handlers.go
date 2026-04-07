@@ -69,6 +69,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/sdk/license", h.GetLicense)
 	mux.HandleFunc("GET /api/sdk/license/field/{name}", h.GetLicenseField)
 	mux.HandleFunc("GET /api/sdk/updates", h.GetUpdates)
+	mux.Handle("POST /api/admin/support-bundle", auth(http.HandlerFunc(h.GenerateSupportBundle)))
 }
 
 // --- Health ---
@@ -665,6 +666,17 @@ func (h *Handler) GetUpdates(w http.ResponseWriter, r *http.Request) {
 		"updates":   updates,
 		"available": len(updates) > 0,
 	})
+}
+
+// --- Support Bundle ---
+
+func (h *Handler) GenerateSupportBundle(w http.ResponseWriter, r *http.Request) {
+	result, err := h.sdk.GenerateSupportBundle()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, result)
 }
 
 // --- Helpers ---

@@ -73,4 +73,8 @@ export const api = {
   getLicense: () => request('/sdk/license'),
   getLicenseField: (name) => request(`/sdk/license/field/${name}`),
   getUpdates: () => request('/sdk/updates'),
+
+  // Support Bundle
+  generateSupportBundle: () =>
+    request('/admin/support-bundle', { method: 'POST' }),
 };
