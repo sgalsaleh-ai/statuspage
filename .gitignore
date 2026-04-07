@@ -21,3 +21,7 @@ chart/statuspage/Chart.lock
 # Environment
 .env
 chart/statuspage/statuspage-*.tgz
+
+# Troubleshoot bundles
+preflightbundle-*.tar.gz
+support-bundle-*.tar.gz
