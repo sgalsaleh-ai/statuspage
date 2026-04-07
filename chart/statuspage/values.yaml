@@ -49,6 +49,8 @@ app:
   jwtSecret: ""
   resendApiKey: ""
   resendFromAddress: "StatusPage <notifications@statuspage.dev>"
+  pageTitle: "StatusPage"
+  pageHeaderText: ""
   # URL browsers use to connect to Centrifugo WebSocket (must be reachable from the browser)
   # Leave empty to use the in-cluster URL (only works with ingress or port-forward)
   centrifugoPublicURL: ""

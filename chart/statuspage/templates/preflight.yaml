@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "statuspage.fullname" . }}-preflight
+  labels:
+    {{- include "statuspage.labels" . | nindent 4 }}
+    troubleshoot.sh/kind: preflight
+stringData:
+  preflight.yaml: |
+    apiVersion: troubleshoot.sh/v1beta2
+    kind: Preflight
+    metadata:
+      name: statuspage-preflight
+    spec:
+      collectors:
+        {{- if not .Values.postgresql.enabled }}
+        - http:
+            collectorName: external-db-check
+            get:
+              url: http://{{ .Values.externalPostgresql.host }}:{{ .Values.externalPostgresql.port | default "5432" }}
+              timeout: 5s
+        {{- end }}
+        - http:
+            collectorName: resend-api-check
+            get:
+              url: https://api.resend.com/
+              timeout: 10s
+      analyzers:
+        {{- if not .Values.postgresql.enabled }}
+        - textAnalyze:
+            checkName: External Database Connectivity
+            fileName: external-db-check.json
+            regex: '"status"'
+            outcomes:
+              - pass:
+                  when: "true"
+                  message: External PostgreSQL database is reachable.
+              - fail:
+                  when: "false"
+                  message: >
+                    Cannot connect to the external PostgreSQL database at {{ .Values.externalPostgresql.host }}:{{ .Values.externalPostgresql.port | default "5432" }}.
+                    Verify the host, port, and network connectivity. Ensure the database is running and accessible from this cluster.
+        {{- end }}
+        - textAnalyze:
+            checkName: Email Service (Resend API) Connectivity
+            fileName: resend-api-check.json
+            regex: '"status"'
+            outcomes:
+              - pass:
+                  when: "true"
+                  message: Resend API endpoint is reachable.
+              - fail:
+                  when: "false"
+                  message: >
+                    Cannot reach the Resend API at https://api.resend.com.
+                    Subscriber email notifications require outbound HTTPS access to api.resend.com.
+                    Check your cluster's network policies and firewall rules.
+        - nodeResources:
+            checkName: Cluster CPU Capacity
+            outcomes:
+              - fail:
+                  when: "sum(cpuCapacity) < 2"
+                  message: >
+                    The cluster has fewer than 2 CPU cores available.
+                    StatusPage requires at least 2 CPU cores across all nodes.
+              - warn:
+                  when: "sum(cpuCapacity) < 4"
+                  message: The cluster has fewer than 4 CPU cores. 4+ recommended for production.
+              - pass:
+                  message: Cluster has sufficient CPU capacity.
+        - nodeResources:
+            checkName: Cluster Memory Capacity
+            outcomes:
+              - fail:
+                  when: "sum(memoryCapacity) < 2Gi"
+                  message: >
+                    The cluster has less than 2Gi of memory.
+                    StatusPage requires at least 2Gi across all nodes.
+              - warn:
+                  when: "sum(memoryCapacity) < 4Gi"
+                  message: The cluster has less than 4Gi of memory. 4Gi+ recommended for production.
+              - pass:
+                  message: Cluster has sufficient memory capacity.
+        - clusterVersion:
+            checkName: Kubernetes Version
+            outcomes:
+              - fail:
+                  when: "< 1.26.0"
+                  message: >
+                    Kubernetes version is below the minimum (1.26.0).
+                    Please upgrade your cluster. See https://kubernetes.io/releases/
+              - warn:
+                  when: "< 1.28.0"
+                  message: Kubernetes version is below recommended (1.28.0). Consider upgrading.
+              - pass:
+                  message: Kubernetes version meets requirements.
+        - distribution:
+            checkName: Kubernetes Distribution
+            outcomes:
+              - fail:
+                  when: "== docker-desktop"
+                  message: >
+                    Docker Desktop is not supported. Use EKS, GKE, AKS, k3s, or kind.
+                    See our docs for supported platforms.
+              - fail:
+                  when: "== microk8s"
+                  message: >
+                    MicroK8s is not supported. Use EKS, GKE, AKS, k3s, or kind.
+                    See our docs for supported platforms.
+              - pass:
+                  message: Kubernetes distribution is supported.
