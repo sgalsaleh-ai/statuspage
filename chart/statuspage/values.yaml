@@ -49,7 +49,7 @@ resources:
 
 # App configuration
 app:
-  jwtSecret: ""
+  jwtSecret: "" # @docs:skip
   resendFromAddress: "StatusPage <onboarding@resend.dev>"
   adminPassword: ""
   enableSupportBundle: true
