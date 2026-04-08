@@ -25,6 +25,7 @@ spec:
 
     app:
       adminPassword: repl{{ ConfigOption `admin_password` }}
+      enableNotifications: repl{{ ConfigOptionEquals `enable_notifications` `1` }}
       pageTitle: repl{{ ConfigOption `page_title` }}
       pageHeaderText: repl{{ ConfigOption `page_header_text` }}
 

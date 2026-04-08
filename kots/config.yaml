@@ -87,6 +87,19 @@ spec:
               pattern: '^.{8,}$'
               message: "Password must be at least 8 characters."
 
+    - name: notifications
+      title: Email Notifications
+      description: Enable subscriber email notifications. This feature requires the "Subscriber Notifications" license entitlement.
+      when: 'repl{{ LicenseFieldValue "subscriber_notifications" }}'
+      items:
+        - name: enable_notifications
+          title: Enable Email Notifications
+          type: bool
+          default: "1"
+          help_text: |
+            When enabled, users can subscribe to email alerts on the public status page
+            and receive notifications when incidents are created or updated.
+
     - name: appearance
       title: Appearance
       description: Customize the look of your public status page.

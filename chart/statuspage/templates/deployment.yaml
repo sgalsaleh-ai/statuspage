@@ -80,6 +80,8 @@ spec:
             - name: RESEND_API_KEY
               value: {{ (index .Values.global.replicated.licenseFields "resend_api_key").value | quote }}
             {{- end }}{{- end }}{{- end }}{{- end }}
+            - name: ENABLE_NOTIFICATIONS
+              value: {{ .Values.app.enableNotifications | quote }}
             {{- if .Values.app.adminPassword }}
             - name: ADMIN_PASSWORD
               value: {{ .Values.app.adminPassword | quote }}
