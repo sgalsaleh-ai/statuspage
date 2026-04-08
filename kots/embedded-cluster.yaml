@@ -15,6 +15,8 @@ spec:
           image:
             registry: 'repl{{ ReplicatedImageRegistry "docker.io" }}'
             repository: 'repl{{ ReplicatedImageRepository "docker.io/library/traefik" }}'
+          updateStrategy:
+            type: Recreate
           ports:
             web:
               hostPort: 80
