@@ -164,7 +164,7 @@ spec:
       items:
         - name: admin_password
           title: Admin Password
-          type: password
+          type: text
           required: true
           help_text: |
             The password for the StatusPage admin account.
