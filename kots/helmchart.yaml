@@ -38,8 +38,6 @@ spec:
         registry: '{{repl ReplicatedImageRegistry (HelmValue ".postgresql.image.registry") }}'
         repository: '{{repl ReplicatedImageRepository (HelmValue ".postgresql.image.repository") true }}'
       global:
-        security:
-          allowInsecureImages: true
         imagePullSecrets:
           - '{{repl ImagePullSecretName }}'
 
@@ -79,6 +77,3 @@ spec:
   builder:
     postgresql:
       enabled: true
-      global:
-        security:
-          allowInsecureImages: true
