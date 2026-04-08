@@ -178,6 +178,7 @@ spec:
           title: Enable Support Bundle Generation
           type: bool
           default: "1"
+          when: 'repl{{ LicenseFieldValue "support_bundle_enabled" }}'
           help_text: |
             When enabled, a "Generate Support Bundle" button appears on the admin dashboard.
             This collects diagnostic data and uploads it to the vendor for troubleshooting.
