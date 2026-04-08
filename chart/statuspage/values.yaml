@@ -60,6 +60,9 @@ app:
 # Embedded PostgreSQL (Bitnami subchart)
 postgresql:
   enabled: true
+  image:
+    registry: proxy.replicated.com
+    repository: proxy/statuspage/registry-1.docker.io/bitnami/postgresql
   auth:
     username: statuspage
     password: statuspage
@@ -87,6 +90,9 @@ externalPostgresql:
 # Centrifugo v5 (subchart) — always embedded, handles real-time WebSocket updates
 centrifugo:
   enabled: true
+  image:
+    registry: proxy.replicated.com
+    repository: proxy/statuspage/docker.io/centrifugo/centrifugo
   config:
     api_key: "statuspage-api-key"
     allowed_origins: "*"
@@ -103,6 +109,9 @@ centrifugo:
 
 # Replicated SDK (subchart)
 replicated:
+  image:
+    registry: proxy.replicated.com
+    repository: library/replicated-sdk-image
   nameOverride: statuspage-sdk
   statusInformers:
     - deployment/statuspage

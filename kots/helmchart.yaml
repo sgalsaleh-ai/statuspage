@@ -18,38 +18,44 @@ spec:
       type: NodePort
       nodePort: 30880
 
-    # App image rewrite (noProxy=true because defaults already point to proxy)
+    # All image defaults already point to proxy in values.yaml
+    # noProxy=true prevents double-prefixing in online mode
+    # airgap mode ignores noProxy and rewrites to local registry
+
+    # App image
     image:
-      registry: '{{repl ReplicatedImageRegistry (HelmValue ".image.registry") true }}'
+      registry: '{{repl ReplicatedImageRegistry (HelmValue ".image.registry") }}'
       repository: '{{repl ReplicatedImageRepository (HelmValue ".image.repository") true }}'
     imagePullSecrets:
       - name: '{{repl ImagePullSecretName }}'
 
-    # PostgreSQL image rewrite (Bitnami uses registry + repository split)
+    # PostgreSQL image
     postgresql:
       enabled: repl{{ ConfigOptionEquals `db_type` `embedded` }}
       auth:
         password: repl{{ ConfigOption `embedded_db_password` }}
       image:
         registry: '{{repl ReplicatedImageRegistry (HelmValue ".postgresql.image.registry") }}'
-        repository: '{{repl ReplicatedImageRepository (print (HelmValue ".postgresql.image.registry") "/" (HelmValue ".postgresql.image.repository")) }}'
+        repository: '{{repl ReplicatedImageRepository (HelmValue ".postgresql.image.repository") true }}'
       global:
+        security:
+          allowInsecureImages: true
         imagePullSecrets:
           - '{{repl ImagePullSecretName }}'
 
-    # Centrifugo image rewrite (uses registry + repository split)
+    # Centrifugo image
     centrifugo:
       image:
         registry: '{{repl ReplicatedImageRegistry (HelmValue ".centrifugo.image.registry") }}'
-        repository: '{{repl ReplicatedImageRepository (print (HelmValue ".centrifugo.image.registry") "/" (HelmValue ".centrifugo.image.repository")) }}'
+        repository: '{{repl ReplicatedImageRepository (HelmValue ".centrifugo.image.repository") true }}'
       imagePullSecrets:
         - name: '{{repl ImagePullSecretName }}'
 
-    # Replicated SDK image rewrite (noProxy=true, hosted in replicated registry)
+    # Replicated SDK image
     replicated:
       image:
-        registry: 'repl{{ ReplicatedImageRegistry "proxy.replicated.com" }}'
-        repository: 'repl{{ ReplicatedImageRepository "library/replicated-sdk-image" true }}'
+        registry: '{{repl ReplicatedImageRegistry (HelmValue ".replicated.image.registry") }}'
+        repository: '{{repl ReplicatedImageRepository (HelmValue ".replicated.image.repository") true }}'
       imagePullSecrets:
         - name: '{{repl ImagePullSecretName }}'
 
