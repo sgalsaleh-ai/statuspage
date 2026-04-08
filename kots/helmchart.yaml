@@ -14,10 +14,6 @@ spec:
     - --timeout=600s
 
   values:
-    service:
-      type: NodePort
-      nodePort: 30880
-
     # All image defaults already point to proxy in values.yaml
     # noProxy=true prevents double-prefixing in online mode
     # airgap mode ignores noProxy and rewrites to local registry
@@ -77,6 +73,23 @@ spec:
           password: "repl{{ ConfigOption `external_db_password` }}"
           database: "repl{{ ConfigOption `external_db_name` }}"
           sslmode: "repl{{ ConfigOption `external_db_sslmode` }}"
+    - when: "repl{{ ConfigOptionEquals `access_type` `node_port` }}"
+      recursiveMerge: true
+      values:
+        service:
+          type: NodePort
+          nodePort: 30880
+    - when: "repl{{ ConfigOptionEquals `access_type` `ingress` }}"
+      recursiveMerge: true
+      values:
+        ingress:
+          enabled: true
+          className: traefik
+          hosts:
+            - host: "repl{{ ConfigOption `ingress_hostname` }}"
+              paths:
+                - path: /
+                  pathType: Prefix
 
   builder:
     postgresql:

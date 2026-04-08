@@ -80,6 +80,36 @@ spec:
             PostgreSQL SSL mode. Use "require" for cloud-hosted databases (Neon, RDS, etc.)
             or "disable" for local/private databases. Valid values: disable, require, verify-ca, verify-full.
 
+    - name: networking
+      title: Networking
+      description: Configure how the application is accessed.
+      items:
+        - name: access_type
+          title: Access Type
+          type: radio
+          default: node_port
+          help_text: |
+            Choose "NodePort" for direct access on a fixed port.
+            Choose "Ingress" to use the Traefik ingress controller with a hostname.
+          items:
+            - name: node_port
+              title: NodePort (direct access on port 30880)
+            - name: ingress
+              title: Ingress (via Traefik with hostname)
+
+        - name: ingress_hostname
+          title: Hostname
+          type: text
+          when: 'repl{{ ConfigOptionEquals "access_type" "ingress" }}'
+          required: true
+          help_text: |
+            The hostname to access the status page (e.g. status.example.com).
+            DNS must point to this server's IP address.
+          validation:
+            regex:
+              pattern: '^[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?)*$'
+              message: "Enter a valid hostname (e.g. status.example.com)."
+
     - name: admin
       title: Application
       description: Configure the StatusPage application.
