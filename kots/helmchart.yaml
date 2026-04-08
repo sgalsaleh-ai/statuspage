@@ -90,6 +90,26 @@ spec:
               paths:
                 - path: /
                   pathType: Prefix
+    - when: "repl{{ and (ConfigOptionEquals `access_type` `ingress`) (ConfigOptionEquals `tls_type` `custom`) }}"
+      recursiveMerge: true
+      values:
+        ingress:
+          tls:
+            - secretName: statuspage-tls
+              hosts:
+                - "repl{{ ConfigOption `ingress_hostname` }}"
+          customTLS:
+            cert: repl{{ ConfigOptionData `tls_cert_file` | Base64Encode }}
+            key: repl{{ ConfigOptionData `tls_key_file` | Base64Encode }}
+    - when: "repl{{ and (ConfigOptionEquals `access_type` `ingress`) (ConfigOptionEquals `tls_type` `lets_encrypt`) }}"
+      recursiveMerge: true
+      values:
+        ingress:
+          annotations:
+            traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+          tls:
+            - hosts:
+                - "repl{{ ConfigOption `ingress_hostname` }}"
 
   builder:
     postgresql:

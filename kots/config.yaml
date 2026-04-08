@@ -110,6 +110,54 @@ spec:
               pattern: '^[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?)*$'
               message: "Enter a valid hostname (e.g. status.example.com)."
 
+        - name: tls_type
+          title: TLS Certificate
+          type: radio
+          default: self_signed
+          when: 'repl{{ ConfigOptionEquals "access_type" "ingress" }}'
+          help_text: |
+            Choose how TLS is configured for HTTPS access.
+            "Self-signed" uses Traefik's built-in certificate (browser warning expected).
+            "Let's Encrypt" automatically provisions a trusted certificate (requires public DNS).
+            "Custom" lets you upload your own certificate and private key.
+          items:
+            - name: self_signed
+              title: Self-signed (Traefik default)
+            - name: lets_encrypt
+              title: Let's Encrypt (automatic)
+            - name: custom
+              title: Custom certificate (upload)
+
+        - name: tls_acme_email
+          title: Let's Encrypt Email
+          type: text
+          when: 'repl{{ and (ConfigOptionEquals "access_type" "ingress") (ConfigOptionEquals "tls_type" "lets_encrypt") }}'
+          required: true
+          help_text: |
+            Email address for Let's Encrypt certificate registration.
+            Used for expiration notices and account recovery.
+          validation:
+            regex:
+              pattern: '^[^@]+@[^@]+\.[^@]+$'
+              message: "Enter a valid email address."
+
+        - name: tls_cert_file
+          title: TLS Certificate
+          type: file
+          when: 'repl{{ and (ConfigOptionEquals "access_type" "ingress") (ConfigOptionEquals "tls_type" "custom") }}'
+          required: true
+          help_text: |
+            Upload a PEM-encoded TLS certificate file.
+            The certificate must be valid for the hostname configured above.
+
+        - name: tls_key_file
+          title: TLS Private Key
+          type: file
+          when: 'repl{{ and (ConfigOptionEquals "access_type" "ingress") (ConfigOptionEquals "tls_type" "custom") }}'
+          required: true
+          help_text: |
+            Upload the PEM-encoded private key corresponding to the TLS certificate.
+
     - name: admin
       title: Application
       description: Configure the StatusPage application.

@@ -20,3 +20,11 @@ spec:
             nodePorts:
               web: 80
               websecure: 443
+          certResolvers:
+            letsencrypt:
+              email: 'repl{{ ConfigOption "tls_acme_email" }}'
+              tlsChallenge: true
+              storage: /data/acme.json
+          persistence:
+            enabled: true
+            size: 128Mi
