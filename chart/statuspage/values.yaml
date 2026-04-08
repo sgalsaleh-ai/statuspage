@@ -63,6 +63,9 @@ postgresql:
   image:
     registry: proxy.replicated.com
     repository: proxy/statuspage/docker.io/bitnami/postgresql
+  global:
+    security:
+      allowInsecureImages: true
   auth:
     username: statuspage
     password: statuspage
