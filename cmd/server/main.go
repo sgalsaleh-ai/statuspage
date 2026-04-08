@@ -105,7 +105,8 @@ func main() {
 		pageTitle = "StatusPage"
 	}
 	pageHeaderText := os.Getenv("PAGE_HEADER_TEXT")
-	configScript := fmt.Sprintf(`<script>window.__CONFIG__={pageTitle:%q,pageHeaderText:%q}</script>`, pageTitle, pageHeaderText)
+	enableSupportBundle := os.Getenv("ENABLE_SUPPORT_BUNDLE") != "false"
+	configScript := fmt.Sprintf(`<script>window.__CONFIG__={pageTitle:%q,pageHeaderText:%q,enableSupportBundle:%t}</script>`, pageTitle, pageHeaderText, enableSupportBundle)
 	indexHTML := strings.Replace(string(indexBytes), "</head>", configScript+"</head>", 1)
 
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {

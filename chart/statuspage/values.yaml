@@ -52,7 +52,7 @@ app:
   jwtSecret: ""
   resendFromAddress: "StatusPage <onboarding@resend.dev>"
   adminPassword: ""
-  enableNotifications: true
+  enableSupportBundle: true
   pageTitle: "StatusPage"
   pageHeaderText: ""
   # URL browsers use to connect to Centrifugo WebSocket (must be reachable from the browser)
