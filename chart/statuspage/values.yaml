@@ -2,12 +2,12 @@
 replicaCount: 1
 
 image:
-  registry: salah-statuspage.puresoft.app
+  registry: statuspage-proxy.puresoft.app
   repository: proxy/statuspage/ghcr.io/sgalsaleh-ai/statuspage
   tag: latest
   pullPolicy: Always
 
-initImage: salah-statuspage.puresoft.app/proxy/statuspage/docker.io/library/busybox:1.36
+initImage: statuspage-proxy.puresoft.app/proxy/statuspage/docker.io/library/busybox:1.36
 
 imagePullSecrets: []
 
@@ -63,7 +63,7 @@ app:
 postgresql:
   enabled: true
   image:
-    registry: salah-statuspage.puresoft.app
+    registry: statuspage-proxy.puresoft.app
     repository: proxy/statuspage/docker.io/bitnami/postgresql
   global:
     security:
@@ -96,7 +96,7 @@ externalPostgresql:
 centrifugo:
   enabled: true
   image:
-    registry: salah-statuspage.puresoft.app
+    registry: statuspage-proxy.puresoft.app
     repository: proxy/statuspage/docker.io/centrifugo/centrifugo
   config:
     api_key: "statuspage-api-key"
@@ -115,7 +115,7 @@ centrifugo:
 # Replicated SDK (subchart)
 replicated:
   image:
-    registry: salah-statuspage.puresoft.app
+    registry: statuspage-proxy.puresoft.app
     repository: library/replicated-sdk-image
   nameOverride: statuspage-sdk
   statusInformers:
