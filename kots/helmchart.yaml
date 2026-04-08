@@ -82,6 +82,13 @@ spec:
     - when: "repl{{ ConfigOptionEquals `access_type` `ingress` }}"
       recursiveMerge: true
       values:
+        traefik:
+          enabled: true
+          image:
+            registry: '{{repl ReplicatedImageRegistry (HelmValue ".traefik.image.registry") }}'
+            repository: '{{repl ReplicatedImageRepository (HelmValue ".traefik.image.repository") true }}'
+          imagePullSecrets:
+            - name: '{{repl ImagePullSecretName }}'
         ingress:
           enabled: true
           className: traefik
@@ -104,6 +111,15 @@ spec:
     - when: "repl{{ and (ConfigOptionEquals `access_type` `ingress`) (ConfigOptionEquals `tls_type` `lets_encrypt`) }}"
       recursiveMerge: true
       values:
+        traefik:
+          certResolvers:
+            letsencrypt:
+              email: "repl{{ ConfigOption `tls_acme_email` }}"
+              tlsChallenge: true
+              storage: /data/acme.json
+          persistence:
+            enabled: true
+            size: 128Mi
         ingress:
           annotations:
             traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
