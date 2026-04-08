@@ -68,6 +68,8 @@ postgresql:
   global:
     security:
       allowInsecureImages: true
+    imagePullSecrets:
+      - statuspage-replicated-pull-secret
   auth:
     username: statuspage
     password: statuspage
@@ -95,6 +97,9 @@ externalPostgresql:
 # Centrifugo v5 (subchart) — always embedded, handles real-time WebSocket updates
 centrifugo:
   enabled: true
+  global:
+    imagePullSecrets:
+      - statuspage-replicated-pull-secret
   image:
     registry: statuspage-proxy.puresoft.app
     repository: proxy/statuspage/docker.io/centrifugo/centrifugo
