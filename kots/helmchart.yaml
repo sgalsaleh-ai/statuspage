@@ -79,3 +79,6 @@ spec:
   builder:
     postgresql:
       enabled: true
+      global:
+        security:
+          allowInsecureImages: true
