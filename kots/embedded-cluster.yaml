@@ -15,11 +15,7 @@ spec:
           image:
             registry: 'repl{{ ReplicatedImageRegistry "docker.io" }}'
             repository: 'repl{{ ReplicatedImageRepository "docker.io/library/traefik" }}'
-          ports:
-            web:
-              hostPort: 80
-            websecure:
-              hostPort: 443
+          hostNetwork: true
           certificatesResolvers:
             letsencrypt:
               acme:
