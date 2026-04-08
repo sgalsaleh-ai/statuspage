@@ -22,12 +22,16 @@ spec:
               hostPort: 80
             websecure:
               hostPort: 443
-          certificatesResolvers:
-            letsencrypt:
-              acme:
-                email: 'repl{{ ConfigOption "tls_acme_email" }}'
-                tlsChallenge: true
-                storage: /data/acme.json
           persistence:
             enabled: true
             size: 128Mi
+        optionalValues:
+          - when: 'repl{{ ConfigOptionEquals "tls_type" "lets_encrypt" }}'
+            recursiveMerge: true
+            values:
+              certificatesResolvers:
+                letsencrypt:
+                  acme:
+                    email: 'repl{{ ConfigOption "tls_acme_email" }}'
+                    tlsChallenge: true
+                    storage: /data/acme.json
