@@ -71,6 +71,15 @@ spec:
           required: true
           help_text: The password for the database user specified above.
 
+        - name: external_db_sslmode
+          title: SSL Mode
+          type: text
+          default: "require"
+          when: 'repl{{ ConfigOptionEquals "db_type" "external" }}'
+          help_text: |
+            PostgreSQL SSL mode. Use "require" for cloud-hosted databases (Neon, RDS, etc.)
+            or "disable" for local/private databases. Valid values: disable, require, verify-ca, verify-full.
+
     - name: admin
       title: Application
       description: Configure the StatusPage application.
