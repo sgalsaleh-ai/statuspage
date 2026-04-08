@@ -22,6 +22,9 @@ spec:
     # noProxy=true prevents double-prefixing in online mode
     # airgap mode ignores noProxy and rewrites to local registry
 
+    # Init container image (busybox for DB wait)
+    initImage: '{{repl ReplicatedImageName (HelmValue ".initImage") true }}'
+
     # App image
     image:
       registry: '{{repl ReplicatedImageRegistry (HelmValue ".image.registry") }}'
