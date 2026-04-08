@@ -112,23 +112,6 @@ centrifugo:
       cpu: 200m
       memory: 128Mi
 
-# Traefik ingress controller (subchart) — disabled by default
-traefik:
-  enabled: false
-  image:
-    registry: salah-statuspage.puresoft.app
-    repository: proxy/statuspage/docker.io/library/traefik
-  service:
-    type: LoadBalancer
-  certResolvers:
-    letsencrypt:
-      email: ""
-      tlsChallenge: true
-      storage: /data/acme.json
-  persistence:
-    enabled: true
-    size: 128Mi
-
 # Replicated SDK (subchart)
 replicated:
   image:
