@@ -114,7 +114,7 @@ jobs:
             --password "${{ steps.customer.outputs.license-id }}"
           helm install statuspage \
             oci://registry.replicated.com/${{ secrets.REPLICATED_APP }}/unstable/statuspage \
-            --set image.tag=${GITHUB_SHA} \
+            --set image.tag=latest \
             --wait --timeout 180s
 
       - name: Verify deployment
