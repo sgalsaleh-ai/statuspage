@@ -42,15 +42,6 @@ Issues encountered while integrating Replicated features during the bootcamp.
 
 ---
 
-## Helm Chart / HelmChart CR
-
-### Helm release secret too large
-- When a leftover `.tgz` was in the chart directory, the chart packaged itself recursively
-- The resulting Helm release secret exceeded 1MB Kubernetes limit
-- No clear error pointing to the recursive packaging — just "Too long"
-
----
-
 ## Preflight Specs: EC v3 vs Native Helm
 
 ### Conflicting requirements between install methods
