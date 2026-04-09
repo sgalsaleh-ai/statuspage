@@ -41,7 +41,7 @@ export default function AdminLayout() {
 
       {/* Update available banner */}
       {updates?.available && (
-        <div className="bg-indigo-600 text-white px-4 py-3 text-center text-sm font-medium">
+        <div className="bg-emerald-600 text-white px-4 py-3 text-center text-sm font-medium">
           A new version is available: {updates.updates[0]?.versionLabel}.
         </div>
       )}
@@ -62,7 +62,7 @@ export default function AdminLayout() {
                     className={({ isActive }) =>
                       `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         isActive
-                          ? 'bg-indigo-50 text-indigo-700'
+                          ? 'bg-emerald-50 text-emerald-700'
                           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                       }`
                     }

@@ -68,7 +68,7 @@ export default function AdminComponents() {
         <h1 className="text-2xl font-bold text-gray-900">Components</h1>
         <button
           onClick={() => { resetForm(); setShowForm(true) }}
-          className="px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
+          className="px-4 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
         >
           Add Component
         </button>
@@ -87,7 +87,7 @@ export default function AdminComponents() {
                 value={form.name}
                 onChange={e => setForm({ ...form, name: e.target.value })}
                 required
-                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
             <div>
@@ -96,7 +96,7 @@ export default function AdminComponents() {
                 value={form.group_name}
                 onChange={e => setForm({ ...form, group_name: e.target.value })}
                 placeholder="e.g. Infrastructure"
-                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
           </div>
@@ -105,7 +105,7 @@ export default function AdminComponents() {
             <input
               value={form.description}
               onChange={e => setForm({ ...form, description: e.target.value })}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
           </div>
           <div>
@@ -113,7 +113,7 @@ export default function AdminComponents() {
             <select
               value={form.status}
               onChange={e => setForm({ ...form, status: e.target.value })}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
             >
               {statuses.map(s => (
                 <option key={s} value={s}>{s.replace('_', ' ')}</option>
@@ -121,7 +121,7 @@ export default function AdminComponents() {
             </select>
           </div>
           <div className="flex gap-3">
-            <button type="submit" className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+            <button type="submit" className="px-5 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
               {editing ? 'Save Changes' : 'Create'}
             </button>
             <button type="button" onClick={resetForm} className="px-5 py-2.5 bg-white border border-gray-200 text-sm font-medium text-gray-700 rounded-xl hover:bg-gray-50 transition-colors">
@@ -163,7 +163,7 @@ export default function AdminComponents() {
                         />
                       ))}
                     </div>
-                    <button onClick={() => startEdit(c)} className="text-sm text-indigo-600 hover:text-indigo-700">Edit</button>
+                    <button onClick={() => startEdit(c)} className="text-sm text-emerald-600 hover:text-emerald-700">Edit</button>
                     <button onClick={() => handleDelete(c.id)} className="text-sm text-red-500 hover:text-red-700">Delete</button>
                   </div>
                 </div>

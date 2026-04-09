@@ -63,7 +63,7 @@ export default function AdminIncidentDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
       </div>
     )
   }
@@ -97,7 +97,7 @@ export default function AdminIncidentDetail() {
             <select
               value={statusForm.status}
               onChange={e => setStatusForm({ ...statusForm, status: e.target.value })}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
             >
               {statuses.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -107,12 +107,12 @@ export default function AdminIncidentDetail() {
             <select
               value={statusForm.impact}
               onChange={e => setStatusForm({ ...statusForm, impact: e.target.value })}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
             >
               {impacts.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
-          <button type="submit" className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+          <button type="submit" className="px-5 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
             Update
           </button>
         </form>
@@ -125,7 +125,7 @@ export default function AdminIncidentDetail() {
             <select
               value={updateForm.status}
               onChange={e => setUpdateForm({ ...updateForm, status: e.target.value })}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
             >
               {statuses.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -138,10 +138,10 @@ export default function AdminIncidentDetail() {
               required
               rows={3}
               placeholder="Describe the current situation..."
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
             />
           </div>
-          <button type="submit" className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+          <button type="submit" className="px-5 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
             Post Update
           </button>
         </form>
@@ -159,7 +159,7 @@ export default function AdminIncidentDetail() {
               <div className="space-y-6">
                 {incident.updates.map(update => (
                   <div key={update.id} className="relative pl-8">
-                    <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-indigo-400" />
+                    <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-emerald-400" />
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <StatusBadge status={update.status} />

@@ -15,7 +15,7 @@ export default function IncidentDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
       </div>
     )
   }
@@ -32,7 +32,7 @@ export default function IncidentDetail() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-3xl mx-auto px-4 py-6">
-          <Link to="/" className="text-sm text-indigo-600 hover:text-indigo-700 mb-2 inline-block">&larr; Back to status</Link>
+          <Link to="/" className="text-sm text-emerald-600 hover:text-emerald-700 mb-2 inline-block">&larr; Back to status</Link>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{incident.title}</h1>
           <div className="flex gap-2 mt-3">
             <StatusBadge status={incident.status} />
@@ -53,7 +53,7 @@ export default function IncidentDetail() {
                 <div className="space-y-6">
                   {incident.updates.map(update => (
                     <div key={update.id} className="relative pl-8">
-                      <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-indigo-400" />
+                      <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full bg-white border-2 border-emerald-400" />
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <StatusBadge status={update.status} />
