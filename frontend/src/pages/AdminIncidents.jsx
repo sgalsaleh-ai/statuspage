@@ -48,7 +48,7 @@ export default function AdminIncidents() {
         <h1 className="text-2xl font-bold text-gray-900">Incidents</h1>
         <button
           onClick={() => setShowForm(true)}
-          className="px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
+          className="px-4 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
         >
           Create Incident
         </button>
@@ -64,7 +64,7 @@ export default function AdminIncidents() {
               onChange={e => setForm({ ...form, title: e.target.value })}
               required
               placeholder="e.g. API Response Times Elevated"
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -73,7 +73,7 @@ export default function AdminIncidents() {
               <select
                 value={form.status}
                 onChange={e => setForm({ ...form, status: e.target.value })}
-                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
               >
                 {statuses.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
@@ -83,7 +83,7 @@ export default function AdminIncidents() {
               <select
                 value={form.impact}
                 onChange={e => setForm({ ...form, impact: e.target.value })}
-                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white"
               >
                 {impacts.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
@@ -96,11 +96,11 @@ export default function AdminIncidents() {
               onChange={e => setForm({ ...form, message: e.target.value })}
               rows={3}
               placeholder="Describe what's happening..."
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
             />
           </div>
           <div className="flex gap-3">
-            <button type="submit" className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
+            <button type="submit" className="px-5 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
               Create Incident
             </button>
             <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 bg-white border border-gray-200 text-sm font-medium text-gray-700 rounded-xl hover:bg-gray-50 transition-colors">
@@ -120,7 +120,7 @@ export default function AdminIncidents() {
             {active.map(incident => (
               <div key={incident.id} className="px-6 py-4 flex items-center justify-between">
                 <Link to={`/admin/incidents/${incident.id}`} className="flex-1">
-                  <span className="font-medium text-gray-900 hover:text-indigo-600 transition-colors">{incident.title}</span>
+                  <span className="font-medium text-gray-900 hover:text-emerald-600 transition-colors">{incident.title}</span>
                   <p className="text-xs text-gray-400 mt-0.5">{new Date(incident.created_at).toLocaleString()}</p>
                 </Link>
                 <div className="flex items-center gap-3">
@@ -144,7 +144,7 @@ export default function AdminIncidents() {
             {resolved.map(incident => (
               <div key={incident.id} className="px-6 py-4 flex items-center justify-between">
                 <Link to={`/admin/incidents/${incident.id}`} className="flex-1">
-                  <span className="font-medium text-gray-500 hover:text-indigo-600 transition-colors">{incident.title}</span>
+                  <span className="font-medium text-gray-500 hover:text-emerald-600 transition-colors">{incident.title}</span>
                   <p className="text-xs text-gray-400 mt-0.5">{new Date(incident.created_at).toLocaleString()}</p>
                 </Link>
                 <div className="flex items-center gap-3">
