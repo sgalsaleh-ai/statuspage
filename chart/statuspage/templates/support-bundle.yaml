@@ -7,7 +7,7 @@ metadata:
     troubleshoot.sh/kind: support-bundle
 stringData:
   support-bundle-spec: |
-    apiVersion: troubleshoot.sh/v1beta2
+    apiVersion: troubleshoot.sh/v1beta3
     kind: SupportBundle
     metadata:
       name: statuspage-support-bundle
