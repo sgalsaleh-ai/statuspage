@@ -133,12 +133,12 @@ jobs:
           name: support-bundle
           path: /tmp/support-bundle.tar.gz
 
-      # - name: Remove cluster
-      #   if: always()
-      #   run: |
-      #     if [ -n "${{ steps.cluster.outputs.cluster-id }}" ]; then
-      #       replicated cluster rm "${{ steps.cluster.outputs.cluster-id }}"
-      #     fi
+      - name: Remove cluster
+        if: always()
+        run: |
+          if [ -n "${{ steps.cluster.outputs.cluster-id }}" ]; then
+            replicated cluster rm "${{ steps.cluster.outputs.cluster-id }}"
+          fi
 
       # - name: Archive channel
       #   if: always()
