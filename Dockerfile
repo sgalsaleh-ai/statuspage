@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/go/pkg/mod --mount=type=cache,target=/root/.cache
     CGO_ENABLED=0 go build -o /statuspage ./cmd/server
 
 # Stage 3: Final image
-FROM alpine:3.20
+FROM alpine:3.21
 ARG TARGETARCH
 RUN apk add --no-cache ca-certificates curl
 # Install support-bundle CLI for in-app bundle generation
