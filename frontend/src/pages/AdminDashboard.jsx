@@ -56,7 +56,7 @@ export default function AdminDashboard() {
         </Link>
         <Link
           to="/admin/incidents"
-          className="px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
+          className="px-4 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
         >
           Create Incident
         </Link>
