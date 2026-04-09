@@ -109,6 +109,15 @@ Issues encountered while integrating Replicated features during the bootcamp.
 - The docs show flat structure but the code expects nested
 - Discovered by reading vandoor source code
 
+### Self-serve signup URL is wrong in Vendor Portal
+- Vendor Portal shows the signup URL as `https://enterprise.replicated.com/signup`
+- This URL immediately redirects to the login page because on the multi-tenant deployment, `/signup` has no app context — `PORTAL_APP_SLUG` is not set for any specific app
+- The correct URL is `https://enterprise.replicated.com/{app_slug}/signup` (e.g. `https://enterprise.replicated.com/statuspage/signup`)
+- Spent significant time debugging why emails weren't being sent, inspecting SQS consumers, integration-api code, email templates — the actual issue was the signup form was never reached because of this redirect
+- The signup page checks `checkTrialSignupEnabled(appSlug)` which fails or returns false without the app slug, then redirects to `/login`
+- The login page interprets "signup" as the app slug in the URL path, sending requests with `app_slug: "signup"` to the magic link endpoint
+- **Impact**: Self-serve signup is completely broken when using the URL shown in Vendor Portal
+
 ### SVG logos don't render
 - SVG files with `<text>` elements fail when converted to data URI
 - No error — just shows broken image
