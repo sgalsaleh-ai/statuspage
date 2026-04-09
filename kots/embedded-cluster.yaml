@@ -1,4 +1,37 @@
 apiVersion: embeddedcluster.replicated.com/v1beta1
 kind: Config
 spec:
-  version: 3.0.0-alpha-31+k8s-1.33
+  version: 3.0.0-alpha-31+k8s-1.34
+  domains:
+    proxyRegistryDomain: statuspage-proxy.puresoft.app
+  extensions:
+    helmCharts:
+      - chart:
+          name: traefik
+          chartVersion: "39.0.7"
+        releaseName: traefik
+        namespace: traefik
+        values:
+          image:
+            registry: 'repl{{ ReplicatedImageRegistry "docker.io" }}'
+            repository: 'repl{{ ReplicatedImageRepository "docker.io/library/traefik" }}'
+          updateStrategy:
+            type: Recreate
+          ports:
+            web:
+              hostPort: 80
+            websecure:
+              hostPort: 443
+          persistence:
+            enabled: true
+            size: 128Mi
+        optionalValues:
+          - when: 'repl{{ ConfigOptionEquals "tls_type" "lets_encrypt" }}'
+            recursiveMerge: true
+            values:
+              certificatesResolvers:
+                letsencrypt:
+                  acme:
+                    email: 'repl{{ ConfigOption "tls_acme_email" }}'
+                    tlsChallenge: true
+                    storage: /data/acme.json

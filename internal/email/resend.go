@@ -19,7 +19,7 @@ func New() *Client {
 	apiKey := os.Getenv("RESEND_API_KEY")
 	fromAddress := os.Getenv("RESEND_FROM_ADDRESS")
 	if fromAddress == "" {
-		fromAddress = "StatusPage <notifications@statuspage.dev>"
+		fromAddress = "StatusPage <onboarding@resend.dev>"
 	}
 
 	if apiKey == "" {

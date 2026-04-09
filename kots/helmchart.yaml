@@ -14,14 +14,51 @@ spec:
     - --timeout=600s
 
   values:
+    # All image defaults already point to proxy in values.yaml
+    # noProxy=true prevents double-prefixing in online mode
+    # airgap mode ignores noProxy and rewrites to local registry
+
+    # Init container image (busybox for DB wait)
+    initImage: '{{repl ReplicatedImageName (HelmValue ".initImage") true }}'
+
+    # App image
+    image:
+      registry: '{{repl ReplicatedImageRegistry (HelmValue ".image.registry") }}'
+      repository: '{{repl ReplicatedImageRepository (HelmValue ".image.repository") true }}'
+    imagePullSecrets:
+      - name: '{{repl ImagePullSecretName }}'
+
+    # PostgreSQL image
     postgresql:
       enabled: repl{{ ConfigOptionEquals `db_type` `embedded` }}
       auth:
         password: repl{{ ConfigOption `embedded_db_password` }}
+      image:
+        registry: '{{repl ReplicatedImageRegistry (HelmValue ".postgresql.image.registry") }}'
+        repository: '{{repl ReplicatedImageRepository (HelmValue ".postgresql.image.repository") true }}'
+      global:
+        imagePullSecrets:
+          - '{{repl ImagePullSecretName }}'
+
+    # Centrifugo image
+    centrifugo:
+      image:
+        registry: '{{repl ReplicatedImageRegistry (HelmValue ".centrifugo.image.registry") }}'
+        repository: '{{repl ReplicatedImageRepository (HelmValue ".centrifugo.image.repository") true }}'
+      imagePullSecrets:
+        - name: '{{repl ImagePullSecretName }}'
+
+    # Replicated SDK image
+    replicated:
+      image:
+        registry: '{{repl ReplicatedImageRegistry (HelmValue ".replicated.image.registry") }}'
+        repository: '{{repl ReplicatedImageRepository (HelmValue ".replicated.image.repository") true }}'
+      imagePullSecrets:
+        - name: '{{repl ImagePullSecretName }}'
 
     app:
-      resendApiKey: repl{{ ConfigOption `resend_api_key` }}
-      resendFromAddress: repl{{ ConfigOption `resend_from_address` }}
+      adminPassword: repl{{ ConfigOption `admin_password` }}
+      enableSupportBundle: repl{{ ConfigOptionEquals `enable_support_bundle` `1` }}
       pageTitle: repl{{ ConfigOption `page_title` }}
       pageHeaderText: repl{{ ConfigOption `page_header_text` }}
 
@@ -35,6 +72,44 @@ spec:
           user: "repl{{ ConfigOption `external_db_user` }}"
           password: "repl{{ ConfigOption `external_db_password` }}"
           database: "repl{{ ConfigOption `external_db_name` }}"
+          sslmode: "repl{{ ConfigOption `external_db_sslmode` }}"
+    - when: "repl{{ ConfigOptionEquals `access_type` `node_port` }}"
+      recursiveMerge: true
+      values:
+        service:
+          type: NodePort
+          nodePort: 30880
+    - when: "repl{{ ConfigOptionEquals `access_type` `ingress` }}"
+      recursiveMerge: true
+      values:
+        ingress:
+          enabled: true
+          className: traefik
+          hosts:
+            - host: "repl{{ ConfigOption `ingress_hostname` }}"
+              paths:
+                - path: /
+                  pathType: Prefix
+    - when: "repl{{ and (ConfigOptionEquals `access_type` `ingress`) (ConfigOptionEquals `tls_type` `custom`) }}"
+      recursiveMerge: true
+      values:
+        ingress:
+          tls:
+            - secretName: statuspage-tls
+              hosts:
+                - "repl{{ ConfigOption `ingress_hostname` }}"
+          customTLS:
+            cert: repl{{ ConfigOptionData `tls_cert_file` | Base64Encode }}
+            key: repl{{ ConfigOptionData `tls_key_file` | Base64Encode }}
+    - when: "repl{{ and (ConfigOptionEquals `access_type` `ingress`) (ConfigOptionEquals `tls_type` `lets_encrypt`) }}"
+      recursiveMerge: true
+      values:
+        ingress:
+          annotations:
+            traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+          tls:
+            - hosts:
+                - "repl{{ ConfigOption `ingress_hostname` }}"
 
   builder:
     postgresql:

@@ -608,8 +608,9 @@ func (h *Handler) DeleteSubscriber(w http.ResponseWriter, r *http.Request) {
 // --- Centrifugo Config ---
 
 func (h *Handler) CentrifugoConfig(w http.ResponseWriter, r *http.Request) {
+	// Return empty URL — browser connects to the same host via reverse proxy /connection/websocket
 	writeJSON(w, http.StatusOK, map[string]string{
-		"url": h.centrifugo.PublicURL(),
+		"url": "",
 	})
 }
 

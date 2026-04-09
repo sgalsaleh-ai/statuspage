@@ -62,13 +62,19 @@ export default function PublicStatus() {
   }
 
   const overall = overallLabels[status?.overall_status] || overallLabels.operational
+  const config = window.__CONFIG__ || {}
+  const pageTitle = config.pageTitle || 'StatusPage'
+  const pageHeaderText = config.pageHeaderText || ''
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-3xl mx-auto px-4 py-6">
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">StatusPage</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{pageTitle}</h1>
+          {pageHeaderText && (
+            <p className="text-sm text-gray-500 mt-1">{pageHeaderText}</p>
+          )}
         </div>
       </div>
 

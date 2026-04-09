@@ -122,7 +122,7 @@ stringData:
                   message: PostgreSQL StatefulSet is healthy.
         - textAnalyze:
             checkName: Database Connection Failures
-            fileName: app-logs/*.log
+            fileName: app-logs/*/*.log
             regex: "failed to connect to database|failed to open database|database not ready after"
             outcomes:
               - fail:
@@ -136,7 +136,7 @@ stringData:
                   message: No database connection errors found in application logs.
         - textAnalyze:
             checkName: Centrifugo Publish Failures
-            fileName: app-logs/*.log
+            fileName: app-logs/*/*.log
             regex: "failed to publish.*event|centrifugo returned status [45]"
             outcomes:
               - fail:

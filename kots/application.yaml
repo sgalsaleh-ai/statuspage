@@ -4,7 +4,7 @@ metadata:
   name: statuspage
 spec:
   title: StatusPage
-  icon: https://raw.githubusercontent.com/sgalsaleh-ai/statuspage/main/frontend/public/favicon.svg
+  icon: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAVklEQVR4nO3QwQmAQAxFwRytYwuzSWvYZraJaANCDkJYnAf/nkmEJOlpzDMr677zNYDuPgN0fQIAAAAAYH/Auo6sDAAAAAAAAAAAAAAAAAAAAECS9PNuAXbvWkEW17sAAAAASUVORK5CYII=
   statusInformers:
     - deployment/statuspage
   ports:

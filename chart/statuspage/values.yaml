@@ -2,16 +2,19 @@
 replicaCount: 1
 
 image:
-  registry: proxy.replicated.com
+  registry: statuspage-proxy.puresoft.app
   repository: proxy/statuspage/ghcr.io/sgalsaleh-ai/statuspage
   tag: latest
   pullPolicy: Always
+
+initImage: statuspage-proxy.puresoft.app/proxy/statuspage/docker.io/library/busybox:1.36
 
 imagePullSecrets: []
 
 service:
   type: ClusterIP
   port: 8080
+  nodePort: ""
 
 ingress:
   enabled: false
@@ -46,9 +49,10 @@ resources:
 
 # App configuration
 app:
-  jwtSecret: ""
-  resendApiKey: ""
-  resendFromAddress: "StatusPage <notifications@statuspage.dev>"
+  jwtSecret: "" # @docs:skip
+  resendFromAddress: "StatusPage <onboarding@resend.dev>"
+  adminPassword: ""
+  enableSupportBundle: true
   pageTitle: "StatusPage"
   pageHeaderText: ""
   # URL browsers use to connect to Centrifugo WebSocket (must be reachable from the browser)
@@ -58,6 +62,14 @@ app:
 # Embedded PostgreSQL (Bitnami subchart)
 postgresql:
   enabled: true
+  image:
+    registry: statuspage-proxy.puresoft.app
+    repository: proxy/statuspage/docker.io/bitnami/postgresql
+  global:
+    security:
+      allowInsecureImages: true
+    imagePullSecrets:
+      - statuspage-replicated-pull-secret
   auth:
     username: statuspage
     password: statuspage
@@ -85,6 +97,12 @@ externalPostgresql:
 # Centrifugo v5 (subchart) — always embedded, handles real-time WebSocket updates
 centrifugo:
   enabled: true
+  global:
+    imagePullSecrets:
+      - statuspage-replicated-pull-secret
+  image:
+    registry: statuspage-proxy.puresoft.app
+    repository: proxy/statuspage/docker.io/centrifugo/centrifugo
   config:
     api_key: "statuspage-api-key"
     allowed_origins: "*"
@@ -101,6 +119,9 @@ centrifugo:
 
 # Replicated SDK (subchart)
 replicated:
+  image:
+    registry: statuspage-proxy.puresoft.app
+    repository: library/replicated-sdk-image
   nameOverride: statuspage-sdk
   statusInformers:
     - deployment/statuspage

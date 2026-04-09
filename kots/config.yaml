@@ -71,40 +71,118 @@ spec:
           required: true
           help_text: The password for the database user specified above.
 
-    - name: notifications
-      title: Email Notifications
-      description: Configure subscriber email notifications powered by Resend.
-      when: 'repl{{ LicenseFieldValue "subscriber_notifications" }}'
-      items:
-        - name: enable_notifications
-          title: Enable Email Notifications
-          type: bool
-          default: "0"
+        - name: external_db_sslmode
+          title: SSL Mode
+          type: text
+          default: "require"
+          when: 'repl{{ ConfigOptionEquals "db_type" "external" }}'
           help_text: |
-            When enabled, subscribers can sign up for email alerts on the public status page.
-            Requires a valid Resend API key.
+            PostgreSQL SSL mode. Use "require" for cloud-hosted databases (Neon, RDS, etc.)
+            or "disable" for local/private databases. Valid values: disable, require, verify-ca, verify-full.
 
-        - name: resend_api_key
-          title: Resend API Key
-          type: password
-          when: 'repl{{ ConfigOptionEquals "enable_notifications" "1" }}'
+    - name: networking
+      title: Networking
+      description: Configure how the application is accessed.
+      items:
+        - name: access_type
+          title: Access Type
+          type: radio
+          default: node_port
+          help_text: |
+            Choose "NodePort" for direct access on a fixed port.
+            Choose "Ingress" to use the Traefik ingress controller with a hostname.
+          items:
+            - name: node_port
+              title: NodePort (direct access on port 30880)
+            - name: ingress
+              title: Ingress (via Traefik with hostname)
+
+        - name: ingress_hostname
+          title: Hostname
+          type: text
+          when: 'repl{{ ConfigOptionEquals "access_type" "ingress" }}'
           required: true
           help_text: |
-            Your Resend API key for sending notification emails.
-            Get one at https://resend.com/api-keys. Starts with "re_".
+            The hostname to access the status page (e.g. status.example.com).
+            DNS must point to this server's IP address.
           validation:
             regex:
-              pattern: '^re_[a-zA-Z0-9_]{10,}$'
-              message: "Resend API key must start with 're_' followed by at least 10 alphanumeric characters."
+              pattern: '^[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9\-]*[a-zA-Z0-9])?)*$'
+              message: "Enter a valid hostname (e.g. status.example.com)."
 
-        - name: resend_from_address
-          title: From Address
-          type: text
-          default: "StatusPage <notifications@statuspage.dev>"
-          when: 'repl{{ ConfigOptionEquals "enable_notifications" "1" }}'
+        - name: tls_type
+          title: TLS Certificate
+          type: radio
+          default: self_signed
+          when: 'repl{{ ConfigOptionEquals "access_type" "ingress" }}'
           help_text: |
-            The email address notifications are sent from (e.g. "StatusPage <alerts@yourdomain.com>").
-            Must be a verified sender domain in your Resend account.
+            Choose how TLS is configured for HTTPS access.
+            "Self-signed" uses Traefik's built-in certificate (browser warning expected).
+            "Let's Encrypt" automatically provisions a trusted certificate (requires public DNS).
+            "Custom" lets you upload your own certificate and private key.
+          items:
+            - name: self_signed
+              title: Self-signed (Traefik default)
+            - name: lets_encrypt
+              title: Let's Encrypt (automatic)
+            - name: custom
+              title: Custom certificate (upload)
+
+        - name: tls_acme_email
+          title: Let's Encrypt Email
+          type: text
+          when: 'repl{{ and (ConfigOptionEquals "access_type" "ingress") (ConfigOptionEquals "tls_type" "lets_encrypt") }}'
+          required: true
+          help_text: |
+            Email address for Let's Encrypt certificate registration.
+            Used for expiration notices and account recovery.
+          validation:
+            regex:
+              pattern: '^[^@]+@[^@]+\.[^@]+$'
+              message: "Enter a valid email address."
+
+        - name: tls_cert_file
+          title: TLS Certificate
+          type: file
+          when: 'repl{{ and (ConfigOptionEquals "access_type" "ingress") (ConfigOptionEquals "tls_type" "custom") }}'
+          required: true
+          help_text: |
+            Upload a PEM-encoded TLS certificate file.
+            The certificate must be valid for the hostname configured above.
+
+        - name: tls_key_file
+          title: TLS Private Key
+          type: file
+          when: 'repl{{ and (ConfigOptionEquals "access_type" "ingress") (ConfigOptionEquals "tls_type" "custom") }}'
+          required: true
+          help_text: |
+            Upload the PEM-encoded private key corresponding to the TLS certificate.
+
+    - name: admin
+      title: Application
+      description: Configure the StatusPage application.
+      items:
+        - name: admin_password
+          title: Admin Password
+          type: text
+          required: true
+          help_text: |
+            The password for the StatusPage admin account.
+            Must be at least 8 characters. Used to log in to the admin dashboard.
+          validation:
+            regex:
+              pattern: '^.{8,}$'
+              message: "Password must be at least 8 characters."
+
+        - name: enable_support_bundle
+          title: Enable Support Bundle Generation
+          type: bool
+          default: "1"
+          when: 'repl{{ LicenseFieldValue "support_bundle_enabled" }}'
+          help_text: |
+            When enabled, a "Generate Support Bundle" button appears on the admin dashboard.
+            This collects diagnostic data and uploads it to the vendor for troubleshooting.
+            Disable to hide the button from the admin UI.
 
     - name: appearance
       title: Appearance
