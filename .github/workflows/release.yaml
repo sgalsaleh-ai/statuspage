@@ -124,6 +124,20 @@ jobs:
           kubectl rollout status deployment/statuspage
           kubectl get pods
 
+      - name: Collect support bundle on failure
+        if: failure()
+        run: |
+          export KUBECONFIG=/tmp/kubeconfig
+          curl -sL https://github.com/replicatedhq/troubleshoot/releases/latest/download/support-bundle_linux_amd64.tar.gz | tar xz -C /usr/local/bin support-bundle
+          support-bundle --load-cluster-specs --interactive=false -o /tmp/support-bundle || true
+
+      - name: Upload support bundle
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: support-bundle
+          path: /tmp/support-bundle.tar.gz
+
       # - name: Remove cluster
       #   if: always()
       #   run: |
