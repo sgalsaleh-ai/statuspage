@@ -132,12 +132,6 @@ Issues encountered while integrating Replicated features during the bootcamp.
 - No `{{else}}` — using `{{#if}}` with a falsy condition produces blank page
 - Not documented as a limitation
 
-### Self-serve signup emails not delivered
-- Trial signup form returns success but verification email never arrives
-- Regular login/invite emails work fine on the same custom domain
-- Server logs show wrong handler being invoked (`login_magic_link.go` instead of `signup.go`)
-- Unresolved — appears to be a platform bug
-
 ### main branch is hidden
 - Enterprise Portal never shows content from `main` branch
 - Must create version branches (e.g. `0.16.0`) for content to appear
