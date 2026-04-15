@@ -2,8 +2,8 @@
 replicaCount: 1
 
 image:
-  registry: statuspage-proxy.puresoft.app
-  repository: proxy/statuspage/ghcr.io/sgalsaleh-ai/statuspage
+  registry: statuspage-proxy.puresoft.app/proxy/statuspage/ghcr.io
+  repository: sgalsaleh-ai/statuspage
   tag: latest
   pullPolicy: Always
 
@@ -63,8 +63,8 @@ app:
 postgresql:
   enabled: true
   image:
-    registry: statuspage-proxy.puresoft.app
-    repository: proxy/statuspage/docker.io/bitnami/postgresql
+    registry: statuspage-proxy.puresoft.app/proxy/statuspage/docker.io
+    repository: bitnami/postgresql
   global:
     security:
       allowInsecureImages: true
@@ -101,8 +101,8 @@ centrifugo:
     imagePullSecrets:
       - statuspage-replicated-pull-secret
   image:
-    registry: statuspage-proxy.puresoft.app
-    repository: proxy/statuspage/docker.io/centrifugo/centrifugo
+    registry: statuspage-proxy.puresoft.app/proxy/statuspage/docker.io
+    repository: centrifugo/centrifugo
   config:
     api_key: "statuspage-api-key"
     allowed_origins: "*"
